@@ -178,30 +178,87 @@ useEffect(() => {
       </div>
     )}
 
-    {question.optionCounts && (
-      <div>
-        <h4>Option counts</h4>
-        {question.optionCounts.map((item) => (
-          <p key={item.option}>
-            {item.option}: {item.count}
-          </p>
-        ))}
-      </div>
-    )}
+    
+{question.optionCounts && (
+  <div className="analytics-section">
+    <h4>Response breakdown</h4>
 
-    {question.averageRating !== undefined && (
-      <div>
-        <h4>Average rating</h4>
-        {question.averageRating === null ? (
-          <p>No ratings submitted yet.</p>
-        ) : (
-          <p>
-            {question.averageRating.toFixed(2)} / 5
-            {" "}({question.ratingCount} ratings)
-          </p>
-        )}
-      </div>
+    {question.optionCounts.length === 0 ? (
+      <p>No options available.</p>
+    ) : (
+      question.optionCounts.map((item) => {
+        const total = question.optionCounts!.reduce(
+          (sum, option) => sum + option.count,
+          0
+        )
+
+        const percentage =
+          total === 0 ? 0 : (item.count / total) * 100
+
+        return (
+          <div key={item.option} className="analytics-item">
+            <div className="analytics-label">
+              <span>{item.option}</span>
+              <span>
+                {item.count} ({percentage.toFixed(0)}%)
+              </span>
+            </div>
+
+            <div
+              className="analytics-track"
+              role="progressbar"
+              aria-label={`${item.option} responses`}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={Math.round(percentage)}
+            >
+              <div
+                className="analytics-fill"
+                style={{ width: `${percentage}%` }}
+              />
+            </div>
+          </div>
+        )
+      })
     )}
+  </div>
+)}
+
+
+    
+{question.averageRating !== undefined && (
+  <div className="analytics-section">
+    <h4>Average rating</h4>
+
+    {question.averageRating === null ? (
+      <p>No ratings submitted yet.</p>
+    ) : (
+      <>
+        <p className="rating-score">
+          {question.averageRating.toFixed(2)} / 5
+          {" "}({question.ratingCount} ratings)
+        </p>
+
+        <div
+          className="analytics-track rating-track"
+          role="progressbar"
+          aria-label="Average rating"
+          aria-valuemin={0}
+          aria-valuemax={5}
+          aria-valuenow={question.averageRating}
+        >
+          <div
+            className="analytics-fill"
+            style={{
+              width: `${(question.averageRating / 5) * 100}%`,
+            }}
+          />
+        </div>
+      </>
+    )}
+  </div>
+)}
+
   </article>
 ))}
 

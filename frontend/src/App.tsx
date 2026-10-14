@@ -34,7 +34,7 @@ function App() {
   const [surveyTitle, setSurveyTitle] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
-
+  const [sharedSurveyId, setSharedSurveyId] = useState<string | null>(null)
   const [surveys, setSurveys] = useState<Survey[]>([])
 
 const [currentPage, setCurrentPage] = useState(1)
@@ -152,6 +152,19 @@ setTotalPages(data.totalPages)
       setLoading(false)
     }
   }
+  
+async function handleShare(surveyId: string) {
+  const link = `${window.location.origin}/surveys/${surveyId}/respond`
+
+  try {
+    await navigator.clipboard.writeText(link)
+    setSharedSurveyId(surveyId)
+  } catch {
+    setSharedSurveyId(null)
+    alert(`Could not copy link. Please copy it manually:\n${link}`)
+  }
+}
+
 
   async function openSurvey(surveyId: string) {
     try {
@@ -962,21 +975,35 @@ return (
                         </p>
                       </div>
 
-                      <div className="survey-actions">
-                        <span
-                          className={`status status-${survey.status}`}
-                        >
-                          {survey.status}
-                        </span>
+                      
+<div className="survey-actions">
+  <span className={`status status-${survey.status}`}>
+    {survey.status}
+  </span>
 
-                        <button
-                          type="button"
-                          className="secondary-button"
-                          onClick={() => openSurvey(survey.id)}
-                        >
-                          Open survey
-                        </button>
-                      </div>
+  <button
+    type="button"
+    className="secondary-button"
+    onClick={() => openSurvey(survey.id)}
+  >
+    Open survey
+  </button>
+
+  {survey.status === "published" && (
+    <button
+      type="button"
+      className="secondary-button"
+      onClick={() => handleShare(survey.id)}
+    >
+      Share
+    </button>
+  )}
+</div>
+{sharedSurveyId === survey.id && (
+  <p role="status" className="share-message">
+    Link copied!
+  </p>
+)}
                     </article>
                   ))}
 
