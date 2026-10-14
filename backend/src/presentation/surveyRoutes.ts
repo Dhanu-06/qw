@@ -309,9 +309,9 @@ router.delete("/:id/questions/:questionId", async (req, res) => {
 
 router.post("/:id/responses", async (req, res) => {
   try {
-    const { answers } = req.body
+    const answers = req.body?.answers
 
-    if (!Array.isArray(answers)) {
+if (!Array.isArray(answers)) {
       res.status(400).json({ message: "Answers must be an array." })
       return
     }

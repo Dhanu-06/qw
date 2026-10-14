@@ -556,3 +556,10 @@ hr {
     transition-duration: 0.01ms !important;
   }
 }
+
+.field-error {
+  color: #dc2626;
+  font-size: 0.875rem;
+  margin-top: 6px;
+  text-align: left;
+}

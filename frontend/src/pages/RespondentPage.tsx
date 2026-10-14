@@ -9,7 +9,9 @@ function RespondentPage() {
 const [survey, setSurvey] = useState<Survey | null>(null)
 const [loading, setLoading] = useState(true)
 const [error, setError] = useState("")
-
+const [validationErrors, setValidationErrors] = useState<
+  Record<string, string>
+>({})
 const [answers, setAnswers] = useState<Record<string, string | string[] | number>>({})
 const [submitting, setSubmitting] = useState(false)
 const [success, setSuccess] = useState(false)
@@ -76,9 +78,13 @@ async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
   })
 
   if (missingAnswer) {
-    setError(`Please answer: ${missingAnswer.label}`)
-    return
-  }
+  setValidationErrors({
+    [missingAnswer.id]: "Please answer this required question.",
+  })
+  return
+}
+
+setValidationErrors({})
 
   try {
     setSubmitting(true)
@@ -245,7 +251,11 @@ async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     ))}
   </div>
 )}
-
+{validationErrors[question.id] && (
+  <p className="field-error">
+    {validationErrors[question.id]}
+  </p>
+)}
 
       {/* Keep all five input controls you already added here. */}
     </article>

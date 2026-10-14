@@ -409,4 +409,311 @@ it("rejects responses to a closed survey", () => {
   ).toThrow("Only published surveys accept responses.")
 })
 
+it("rejects a blank required text answer", () => {
+  const survey = Survey.rehydrate(
+    "survey-25",
+    "Employee Onboarding",
+    "published",
+    [
+      {
+        id: "q1",
+        label: "What is your role?",
+        type: "short_text",
+        required: true,
+      },
+    ]
+  )
+
+  expect(() =>
+    survey.validateAnswers([
+      { questionId: "q1", value: "   " },
+    ])
+  ).toThrow("Required question cannot be empty.")
+})
+
+it("rejects an answer for an unknown question", () => {
+  const survey = Survey.rehydrate(
+    "survey-26",
+    "Employee Onboarding",
+    "published",
+    [
+      {
+        id: "q1",
+        label: "What is your role?",
+        type: "short_text",
+        required: true,
+      },
+    ]
+  )
+
+  expect(() =>
+    survey.validateAnswers([
+      { questionId: "unknown-question", value: "Developer" },
+    ])
+  ).toThrow("Answer refers to an unknown question.")
+})
+
+it("rejects an invalid single-choice option", () => {
+  const survey = Survey.rehydrate(
+    "survey-27",
+    "Employee Onboarding",
+    "published",
+    [
+      {
+        id: "q1",
+        label: "How was your onboarding?",
+        type: "single_choice",
+        required: true,
+        options: ["Good", "Bad"],
+      },
+    ]
+  )
+
+  expect(() =>
+    survey.validateAnswers([
+      { questionId: "q1", value: "Excellent" },
+    ])
+  ).toThrow("Invalid single-choice answer.")
+})
+
+it("rejects an invalid multiple-choice option", () => {
+  const survey = Survey.rehydrate(
+    "survey-28",
+    "Employee Onboarding",
+    "published",
+    [
+      {
+        id: "q1",
+        label: "What support do you need?",
+        type: "multiple_choice",
+        required: true,
+        options: ["Training", "Mentoring", "Resources"],
+      },
+    ]
+  )
+
+  expect(() =>
+    survey.validateAnswers([
+      {
+        questionId: "q1",
+        value: ["Training", "Free holidays"],
+      },
+    ])
+  ).toThrow("Invalid multiple-choice answer.")
+})
+
+it("rejects duplicate multiple-choice selections", () => {
+  const survey = Survey.rehydrate(
+    "survey-29",
+    "Employee Onboarding",
+    "published",
+    [
+      {
+        id: "q1",
+        label: "What support do you need?",
+        type: "multiple_choice",
+        required: true,
+        options: ["Training", "Mentoring", "Resources"],
+      },
+    ]
+  )
+
+  expect(() =>
+    survey.validateAnswers([
+      {
+        questionId: "q1",
+        value: ["Training", "Training"],
+      },
+    ])
+  ).toThrow("Invalid multiple-choice answer.")
+})
+
+it("rejects an empty selection for a required multiple-choice question", () => {
+  const survey = Survey.rehydrate(
+    "survey-30",
+    "Employee Onboarding",
+    "published",
+    [
+      {
+        id: "q1",
+        label: "What support do you need?",
+        type: "multiple_choice",
+        required: true,
+        options: ["Training", "Mentoring", "Resources"],
+      },
+    ]
+  )
+
+  expect(() =>
+    survey.validateAnswers([
+      { questionId: "q1", value: [] },
+    ])
+  ).toThrow("Required question cannot be empty.")
+})
+
+
+it("rejects a decimal rating", () => {
+  const survey = Survey.rehydrate(
+    "survey-31",
+    "Employee Onboarding",
+    "published",
+    [
+      {
+        id: "q1",
+        label: "Rate your onboarding",
+        type: "rating",
+        required: true,
+      },
+    ]
+  )
+
+  expect(() =>
+    survey.validateAnswers([
+      { questionId: "q1", value: 2.5 },
+    ])
+  ).toThrow("Rating must be a whole number from 1 to 5.")
+})
+
+it("rejects a rating below 1", () => {
+  const survey = Survey.rehydrate(
+    "survey-32",
+    "Employee Onboarding",
+    "published",
+    [
+      {
+        id: "q1",
+        label: "Rate your onboarding",
+        type: "rating",
+        required: true,
+      },
+    ]
+  )
+
+  expect(() =>
+    survey.validateAnswers([
+      { questionId: "q1", value: 0 },
+    ])
+  ).toThrow("Rating must be a whole number from 1 to 5.")
+})
+
+it("allows an unanswered optional question to be omitted", () => {
+  const survey = Survey.rehydrate(
+    "survey-33",
+    "Employee Onboarding",
+    "published",
+    [
+      {
+        id: "q1",
+        label: "What is your role?",
+        type: "short_text",
+        required: true,
+      },
+      {
+        id: "q2",
+        label: "Any additional comments?",
+        type: "long_text",
+        required: false,
+      },
+    ]
+  )
+
+  expect(() =>
+    survey.validateAnswers([
+      { questionId: "q1", value: "Developer" },
+    ])
+  ).not.toThrow()
+})
+
+it("rejects a non-string text answer", () => {
+  const survey = Survey.rehydrate(
+    "survey-34",
+    "Employee Onboarding",
+    "published",
+    [
+      {
+        id: "q1",
+        label: "What is your role?",
+        type: "short_text",
+        required: true,
+      },
+    ]
+  )
+
+  expect(() =>
+    survey.validateAnswers([
+      { questionId: "q1", value: 123 },
+    ])
+  ).toThrow("Text answers must be strings.")
+})
+
+it("rejects a non-array answer payload", () => {
+  const survey = Survey.rehydrate(
+    "survey-35",
+    "Employee Onboarding",
+    "published",
+    [
+      {
+        id: "q1",
+        label: "What is your role?",
+        type: "short_text",
+        required: true,
+      },
+    ]
+  )
+
+  expect(() =>
+    survey.validateAnswers(
+      { questionId: "q1", value: "Developer" } as any
+    )
+  ).toThrow("Answers must be an array.")
+})
+
+it("rejects responses to a draft survey", () => {
+  const survey = Survey.rehydrate(
+    "survey-36",
+    "Employee Onboarding",
+    "draft",
+    [
+      {
+        id: "q1",
+        label: "What is your role?",
+        type: "short_text",
+        required: true,
+      },
+    ]
+  )
+
+  expect(() =>
+    survey.validateAnswers([
+      { questionId: "q1", value: "Developer" },
+    ])
+  ).toThrow("Only published surveys accept responses.")
+})
+
+it("accepts valid multiple-choice selections", () => {
+  const survey = Survey.rehydrate(
+    "survey-37",
+    "Employee Onboarding",
+    "published",
+    [
+      {
+        id: "q1",
+        label: "What support do you need?",
+        type: "multiple_choice",
+        required: true,
+        options: ["Training", "Mentoring", "Resources"],
+      },
+    ]
+  )
+
+  expect(() =>
+    survey.validateAnswers([
+      {
+        questionId: "q1",
+        value: ["Training", "Mentoring"],
+      },
+    ])
+  ).not.toThrow()
+})
+
 })
