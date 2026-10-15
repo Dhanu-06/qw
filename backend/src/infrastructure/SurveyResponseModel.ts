@@ -17,6 +17,7 @@ const surveyResponseSchema = new Schema(
   {
     _id: { type: String, required: true },
     surveyId: { type: String, required: true, index: true },
+    isSeedData: { type: Boolean, default: false },
     answers: {
       type: [answerSchema],
       required: true,

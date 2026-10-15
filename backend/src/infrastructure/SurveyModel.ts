@@ -24,11 +24,20 @@ const questionSchema = new Schema<Question>(
   { _id: false }
 )
 
-const surveySchema = new Schema(
+const surveySchema = new Schema<{
+  _id: string
+  title: string
+  description: string
+  status: SurveyStatus
+  questions: Question[]
+  isSeedData: boolean
+}>(
   {
-     _id: { type: String, required: true },
-    title: { type: String, required: true, trim: true },
-    status: {
+      _id: { type: String, required: true },
+      title: { type: String, required: true, trim: true },
+      description: { type: String, default: "" },
+      isSeedData: { type: Boolean, default: false },
+      status: {
       type: String,
       enum: ["draft", "published", "closed"] satisfies SurveyStatus[],
       default: "draft",

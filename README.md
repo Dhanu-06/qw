@@ -82,9 +82,11 @@ docker compose up -d
 
 ### 3. Configure the backend
 
-Create a \`backend/.env\` file and configure the MongoDB connection string using the environment variable expected by \`backend/src/infrastructure/database.ts\`.
+Create a backend/.env file with the following configuration:
 
-Do not commit your real environment file or credentials.
+MONGODB_URI=mongodb://localhost:27017/qw_survey
+
+The backend reads the MongoDB connection string from MONGODB_URI. Keep your .env file private and never commit real credentials.
 
 ### 4. Start the backend
 
@@ -95,6 +97,23 @@ cd backend
 npm install
 npm run dev
 \`\`\`
+
+### Seed Demo Data
+
+From the `backend` directory, run:
+
+```bash
+npm install
+npm run seed
+```
+
+The seed script creates 12 demo surveys with different lifecycle statuses and adds 3 sample responses to the Employee Onboarding Feedback survey.
+
+Running the command again removes and recreates only records marked as demo data (`isSeedData: true`). Other surveys and responses are preserved.
+
+### Reset Demo Data
+
+Run `npm run seed` again to reset and recreate the demo dataset. This command does not delete non-demo records.
 
 ### 5. Start the frontend
 
