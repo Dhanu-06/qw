@@ -38,11 +38,20 @@ router.post("/", async (req, res) => {
       return
     }
 
-    const survey = await createSurvey.execute(title.trim())
+    const description =
+  typeof req.body.description === "string"
+    ? req.body.description.trim()
+    : ""
+
+const survey = await createSurvey.execute(
+  title.trim(),
+  description
+)
 
     res.status(201).json({
       id: survey.id,
       title: survey.title,
+      description: survey.description,
       status: survey.status,
       questions: survey.getQuestions(),
     })
@@ -75,6 +84,7 @@ router.get("/", async (req, res) => {
       surveys: paginatedSurveys.map((survey) => ({
         id: survey.id,
         title: survey.title,
+        description: survey.description,
         status: survey.status,
         questions: survey.getQuestions(),
       })),
@@ -269,6 +279,7 @@ router.get("/:id", async (req, res) => {
     res.status(200).json({
       id: survey.id,
       title: survey.title,
+      description: survey.description,
       status: survey.status,
       questions: survey.getQuestions(),
     })
@@ -360,11 +371,25 @@ router.get("/:id/results", async (req, res) => {
 
 router.get("/:id/responses", async (req, res) => {
   try {
-    const page = Math.max(1, Number(req.query.page) || 1)
-    const limit = Math.min(
-      10,
-      Math.max(1, Number(req.query.limit) || 5)
-    )
+    const rawPage = req.query.page
+const rawLimit = req.query.limit
+
+const page = rawPage === undefined ? 1 : Number(rawPage)
+const limit = rawLimit === undefined ? 5 : Number(rawLimit)
+
+if (
+  !Number.isInteger(page) ||
+  page < 1 ||
+  !Number.isInteger(limit) ||
+  limit < 1 ||
+  limit > 10
+) {
+  res.status(400).json({
+    message:
+      "Page must be a positive integer. Limit must be an integer between 1 and 10.",
+  })
+  return
+}
 
     const survey = await surveyRepository.findById(req.params.id)
 
@@ -379,7 +404,7 @@ router.get("/:id/responses", async (req, res) => {
         page,
         limit
       )
-
+ 
     res.status(200).json({
       responses: documents,
       page,

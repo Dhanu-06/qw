@@ -5,8 +5,12 @@ import type { SurveyRepository } from "./SurveyRepository"
 export class CreateSurvey {
   constructor(private readonly surveyRepository: SurveyRepository) {}
 
-  async execute(title: string): Promise<Survey> {
-    const survey = new Survey(crypto.randomUUID(), title)
+  async execute(title: string, description: string = ""): Promise<Survey> {
+    const survey = new Survey(
+      crypto.randomUUID(),
+      title,
+      description
+    )
 
     await this.surveyRepository.save(survey)
 

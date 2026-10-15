@@ -59,7 +59,8 @@ const filter = status
         type: question.type,
         required: question.required,
         options: question.options,
-      }))
+      })),
+      document.description ?? ""
     )
   )
 
@@ -72,6 +73,7 @@ const filter = status
       {
         _id: survey.id,
         title: survey.title,
+        description: survey.description,
         status: survey.status,
         questions: survey.getQuestions(),
       },

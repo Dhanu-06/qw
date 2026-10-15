@@ -151,6 +151,11 @@ setValidationErrors({})
       <section className="create-form">
         <p className="eyebrow">EMPLOYEE EXPERIENCE</p>
         <h1>{survey.title}</h1>
+        {survey.description && (
+  <p className="survey-description">
+    {survey.description}
+  </p>
+)}
         <p>Share your feedback by answering the questions below.</p>
 
         

@@ -23,6 +23,7 @@ type Question = {
 export type Survey = {
   id: string
   title: string
+  description: string
   status: "draft" | "published" | "closed"
   questions: Question[]
 }
@@ -32,6 +33,7 @@ const API_URL = "http://localhost:5000/api/surveys"
 function App() {
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [surveyTitle, setSurveyTitle] = useState("")
+const [surveyDescription, setSurveyDescription] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [sharedSurveyId, setSharedSurveyId] = useState<string | null>(null)
@@ -130,6 +132,7 @@ setTotalPages(data.totalPages)
         },
         body: JSON.stringify({
           title: surveyTitle.trim(),
+          description: surveyDescription.trim(),
         }),
       })
 
@@ -141,6 +144,7 @@ setTotalPages(data.totalPages)
 
       await refreshSurveys()
       setSurveyTitle("")
+      setSurveyDescription("")
       setShowCreateForm(false)
     } catch (error) {
       setError(
@@ -846,6 +850,13 @@ return (
                   }
                   placeholder="e.g. New Employee Onboarding"
                 />
+                
+<textarea
+  value={surveyDescription}
+  onChange={(e) => setSurveyDescription(e.target.value)}
+  placeholder="Survey description (optional)"
+  rows={3}
+/>
 
                 {error && (
                   <p role="alert" className="error-message">
@@ -969,11 +980,14 @@ return (
                       key={survey.id}
                     >
                       <div>
-                        <h3>{survey.title}</h3>
-                        <p>
-                          {survey.questions.length} questions
-                        </p>
-                      </div>
+  <h3>{survey.title}</h3>
+  {survey.description && (
+    <p>{survey.description}</p>
+  )}
+  <p>
+    {survey.questions.length} questions
+  </p>
+</div>
 
                       
 <div className="survey-actions">

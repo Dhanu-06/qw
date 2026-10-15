@@ -6,20 +6,24 @@ export type SurveyStatus = "draft" | "published" | "closed"
 export class Survey {
   private questions: Question[] = []
 
-  constructor(
-    public readonly id: string,
-    public title: string,
-    public status: SurveyStatus = "draft"
-  ) {}
+  
+constructor(
+  public readonly id: string,
+  public title: string,
+  public description: string = "",
+  public status: SurveyStatus = "draft"
+) {}
+
 
 
 static rehydrate(
   id: string,
   title: string,
   status: SurveyStatus,
-  questions: Question[]
+  questions: Question[],
+  description: string = ""
 ): Survey {
-  const survey = new Survey(id, title)
+  const survey = new Survey(id, title, description)
 
   for (const question of questions) {
     survey.validateQuestion(question)
@@ -31,6 +35,7 @@ static rehydrate(
   }))
 
   survey.title = title
+  survey.description = description
   survey.status = status
 
   return survey
