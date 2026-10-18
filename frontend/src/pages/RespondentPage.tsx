@@ -25,7 +25,7 @@ useEffect(() => {
       setError("")
 
       const response = await fetch(
-        `http://localhost:5000/api/surveys/${surveyId}`
+        `${import.meta.env.VITE_API_URL}/surveys/${surveyId}`
       )
 
       if (!response.ok) {
@@ -90,7 +90,7 @@ setValidationErrors({})
     setSubmitting(true)
 
     const response = await fetch(
-      `http://localhost:5000/api/surveys/${survey.id}/responses`,
+      `${import.meta.env.VITE_API_URL}/surveys/${survey.id}/responses`,
       {
         method: "POST",
         headers: {

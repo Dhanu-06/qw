@@ -61,7 +61,7 @@ const [responsesError, setResponsesError] = useState('')
         setError('')
 
         const response = await fetch(
-          `http://localhost:5000/api/surveys/${surveyId}/results`
+          `${import.meta.env.VITE_API_URL}/surveys/${surveyId}/results`
         )
 
         if (!response.ok) {
@@ -100,7 +100,7 @@ useEffect(() => {
       setResponsesError('')
 
       const response = await fetch(
-        `http://localhost:5000/api/surveys/${surveyId}/responses?page=${responsePage}&limit=5`
+        `${import.meta.env.VITE_API_URL}/surveys/${surveyId}/responses?page=${responsePage}&limit=5`
       )
 
       if (!response.ok) {

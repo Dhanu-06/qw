@@ -28,7 +28,7 @@ export type Survey = {
   questions: Question[]
 }
 
-const API_URL = "http://localhost:5000/api/surveys"
+const API_URL = `${import.meta.env.VITE_API_URL}/surveys`;
 
 function App() {
   const [showCreateForm, setShowCreateForm] = useState(false)
@@ -408,7 +408,7 @@ async function closeSurvey() {
 
   try {
     const response = await fetch(
-      `http://localhost:5000/api/surveys/${selectedSurvey.id}/close`,
+      `${import.meta.env.VITE_API_URL}/surveys/${selectedSurvey.id}/close`,
       { method: "POST" }
     )
 
