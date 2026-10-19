@@ -10,12 +10,14 @@ Use this checklist to verify the application against the assignment requirements
 
 ## Test environment
 
-- Date tested: 2026-10-19
-- Browser / version: _Fill in_
-- Frontend URL: _Fill in with your deployed Vercel URL_
-- Backend URL: _Fill in with your deployed backend URL_
-- Database: _Select the database used for the test (for example, MongoDB Atlas)_
-- Commit tested: _Optional: record the Git commit hash_
+- ## Test environment
+
+- **Date tested:** 2026-10-19
+- **Browser / version:** Google Chrome 
+- **Frontend URL:** https://qw-five-red.vercel.app/
+- **Backend URL:** https://qw-backend-z8pd.onrender.com/
+- **Database:** MongoDB Atlas
+
 
 ---
 
