@@ -1,11 +1,11 @@
 # QW Survey
 
-A full-stack survey management application built with React, TypeScript, Express, and MongoDB. It allows users to create surveys, manage questions, publish surveys, collect responses, and view results.
+A full-stack survey management application built with React, TypeScript, Express, and MongoDB. It allows authors to create surveys, manage questions, preview and publish surveys, collect responses, and view results.
 
 ## Features
 
 - Create and manage surveys.
-- Add, edit, and delete survey questions.
+- Add, edit, and delete survey questions while a survey is a draft.
 - Support short text, long text, single choice, multiple choice, and rating questions.
 - Preview surveys before publishing.
 - Publish and close surveys.
@@ -15,7 +15,7 @@ A full-stack survey management application built with React, TypeScript, Express
 - Browse submitted responses using server-side pagination.
 - Persist data in MongoDB.
 
-## Technology Stack
+## Technology stack
 
 ### Frontend
 - React
@@ -30,14 +30,14 @@ A full-stack survey management application built with React, TypeScript, Express
 - MongoDB
 - Mongoose
 
-### Development and Testing
+### Development and testing
 - Docker Compose
 - Vitest
 
-## Project Structure
+## Project structure
 
-\`\`\`text
-qw_survey/
+```text
+qw/
 ├── backend/
 │   └── src/
 │       ├── application/
@@ -46,137 +46,234 @@ qw_survey/
 │       └── presentation/
 ├── frontend/
 │   └── src/
-│       ├── pages/
-│       ├── assets/
-│       ├── App.tsx
-│       └── App.css
 ├── docker-compose.yml
+├── API_Documentation.md
+├── ARCHITECTURE.md
+├── ACCEPTANCE_CHECKLIST.md
+├── KNOWN_LIMITATIONS.md
 ├── .gitignore
 └── README.md
-\`\`\`
+```
+
+The acceptance checklist and known-limitations files are supporting submission documents. Ensure they exist in the repository before submitting.
 
 ## Prerequisites
 
-Install the following before running the project:
+Install the following:
 
-- Node.js and npm
-- Docker Desktop
 - Git
+- Node.js and npm (a current Node.js LTS release is recommended)
+- Docker Desktop with Docker Compose
 
-## Getting Started
+## Getting started
 
 ### 1. Clone the repository
 
-\`\`\`bash
+```bash
 git clone https://github.com/Dhanu-06/qw.git
 cd qw
-\`\`\`
+```
 
 ### 2. Start MongoDB
 
-From the project root, run:
+From the repository root, run:
 
-\`\`\`bash
+```bash
 docker compose up -d
-\`\`\`
+docker compose ps
+```
+
+The Compose configuration should use a named volume if you want local MongoDB data to persist when the containers are stopped and recreated.
 
 ### 3. Configure the backend
 
-Create a backend/.env file with the following configuration:
+Create a `backend/.env` file for local development:
 
-MONGODB_URI=mongodb://localhost:27017/qw_survey
+```dotenv
+MONGODB_URI=mongodb://127.0.0.1:27017/qw_survey
+PORT=5000
+```
 
-The backend reads the MongoDB connection string from MONGODB_URI. Keep your .env file private and never commit real credentials.
+Do not commit `.env` files or real credentials. If you use MongoDB Atlas instead of the local Compose database, set `MONGODB_URI` to your Atlas connection string in the local environment or hosting provider.
 
-### 4. Start the backend
+### 4. Install backend dependencies and start the API
 
-Open a terminal:
+From the repository root:
 
-\`\`\`bash
+```bash
 cd backend
 npm install
 npm run dev
-\`\`\`
+```
 
-### Seed Demo Data
+The API should start on `http://localhost:5000` when `PORT=5000`. Keep this terminal open.
 
-From the `backend` directory, run:
+To build the backend:
 
 ```bash
+npm run build
+```
+
+To run the built backend:
+
+```bash
+npm start
+```
+
+### 5. Configure and start the frontend
+
+Open a second terminal from the repository root:
+
+```bash
+cd frontend
+npm install
+```
+
+Create a `frontend/.env` file for local development:
+
+```dotenv
+VITE_API_URL=http://localhost:5000/api
+```
+
+Then start the Vite development server:
+
+```bash
+npm run dev
+```
+
+Open the local URL printed by Vite, usually `http://localhost:5173`.
+
+Vite environment variables are read when the app starts or builds. Restart the development server after changing `frontend/.env`.
+
+For production deployment, set `VITE_API_URL` in the frontend hosting settings to the deployed backend URL ending in `/api`. Do not put database credentials in frontend environment variables.
+
+## Seed demo data
+
+The backend includes a seed script that creates 12 demo surveys and 3 sample responses.
+
+The demo surveys include draft, published, and closed statuses. The sample responses include choice answers, text answers, and ratings, and are associated with the Employee Onboarding Feedback survey.
+
+Run the following commands from the repository root:
+
+```bash
+cd backend
 npm install
 npm run seed
 ```
 
-The seed script creates 12 demo surveys with different lifecycle statuses and adds 3 sample responses to the Employee Onboarding Feedback survey.
+Before recreating the demo dataset, the script deletes existing survey responses and surveys marked with `isSeedData: true`. Records not marked as demo data are not targeted by these deletion queries.
 
-Running the command again removes and recreates only records marked as demo data (`isSeedData: true`). Other surveys and responses are preserved.
+Running the seed command again recreates the demo dataset. It is not a full database reset.
 
-### Reset Demo Data
+## Stop the application
 
-Run `npm run seed` again to reset and recreate the demo dataset. This command does not delete non-demo records.
+- Stop the frontend development server by pressing `Ctrl+C` in its terminal.
+- Stop the backend development server by pressing `Ctrl+C` in its terminal.
+- Stop MongoDB from the repository root:
 
-### 5. Start the frontend
+```bash
+docker compose down
+```
 
-Open a separate terminal from the project root:
+`docker compose down` stops and removes the Compose containers and network but preserves named volumes.
 
-\`\`\`bash
-cd frontend
-npm install
-npm run dev
-\`\`\`
+## Reset data
 
-Open the local URL printed by Vite in your terminal, usually http://localhost:5173.
+### Reset the demo dataset
 
-## Testing
+From the repository root:
 
-Run the backend tests:
+```bash
+cd backend
+npm run seed
+```
 
-\`\`\`bash
+This recreates the demo records according to the seed script. Records not marked with `isSeedData: true` are not targeted by the cleanup queries.
+
+### Completely reset local MongoDB data
+
+**Warning:** This permanently deletes data stored in the Compose MongoDB volume, including surveys and responses that are not demo data.
+
+From the repository root:
+
+```bash
+docker compose down -v
+docker compose up -d
+```
+
+Then restore demo data if needed:
+
+```bash
+cd backend
+npm run seed
+```
+
+Only run `docker compose down -v` when you deliberately want to delete all data in the local Compose volume. Do not use this command against a production database.
+
+## Testing and builds
+
+Run backend tests:
+
+```bash
 cd backend
 npm test
-\`\`\`
+```
+
+Build the backend:
+
+```bash
+cd backend
+npm run build
+```
 
 Build the frontend:
 
-\`\`\`bash
+```bash
 cd frontend
 npm run build
-\`\`\`
+```
+
+Record the actual outcome of each manual acceptance scenario in `ACCEPTANCE_CHECKLIST.md`. Do not mark a scenario as passed until it has been tested. Include screenshots or API responses as evidence where useful.
 
 ## Architecture
 
-The backend follows a Domain-Driven Design-inspired layered structure:
+The backend follows a lightweight Domain-Driven Design (DDD) approach:
 
 - **Domain:** Survey entities, question definitions, response models, and business rules.
 - **Application:** Use cases for creating surveys, managing questions, submitting responses, and calculating results.
 - **Infrastructure:** MongoDB models and repository implementations.
-- **Presentation:** Express routes that expose the application through HTTP APIs.
+- **Presentation:** Express routes that expose application operations through HTTP APIs.
 
-The React frontend provides the survey dashboard, survey builder, respondent form, and results page.
+The `Survey` domain entity owns question definitions and lifecycle rules. Repository interfaces separate application logic from MongoDB/Mongoose-specific code. The React frontend provides the survey dashboard, builder and preview, respondent form, and results views.
 
-## API Overview
+See [ARCHITECTURE.md](ARCHITECTURE.md) for the detailed architecture, request flow, design tradeoffs, and implementation notes.
 
-Base URL: \`http://localhost:5000/api/surveys\`
+## API documentation
 
-| Method | Endpoint | Purpose |
-|---|---|---|
-| GET | \`/api/surveys\` | List surveys with pagination and optional status filtering |
-| POST | \`/api/surveys\` | Create a survey |
-| GET | \`/api/surveys/:id\` | Retrieve a survey |
-| POST | \`/api/surveys/:id/questions\` | Add a question |
-| PUT | \`/api/surveys/:id/questions/:questionId\` | Update a question |
-| DELETE | \`/api/surveys/:id/questions/:questionId\` | Delete a question |
-| POST | \`/api/surveys/:id/publish\` | Publish a survey |
-| POST | \`/api/surveys/:id/close\` | Close a survey |
-| POST | \`/api/surveys/:id/responses\` | Submit a response |
-| GET | \`/api/surveys/:id/responses\` | List responses with server-side pagination |
-| GET | \`/api/surveys/:id/results\` | Retrieve survey result summaries |
+The local surveys API base URL is:
 
-Pagination endpoints accept query parameters such as \`page\` and \`limit\`. The survey listing also supports a \`status\` filter.
+```text
+http://localhost:5000/api/surveys
+```
+
+The backend health check is available at `GET http://localhost:5000/`.
+
+See [API_Documentation.md](API_Documentation.md) for endpoint details, request and response examples, question and answer validation, pagination, and error behavior.
+
+## Acceptance checklist and known limitations
+
+- [Acceptance checklist](ACCEPTANCE_CHECKLIST.md) — record the steps, expected results, actual results, and evidence for each required scenario.
+- [Known limitations](KNOWN_LIMITATIONS.md) — document incomplete requirements and confirmed issues honestly.
+
+Ensure these files exist before submission. Only record results that have actually been verified.
+
+## Deployment
+
+The frontend and backend can be deployed separately. Set the frontend's `VITE_API_URL` to the public backend API base, for example `https://your-backend-domain/api`, and configure the backend's `MONGODB_URI` and `PORT` through the hosting provider's environment settings.
+
+Use fictional demo data only. Keep database credentials on the backend, do not expose MongoDB credentials to the browser, and restrict hosted database network access where practical.
 
 ## Notes
 
-- Configure environment variables locally before starting the backend.
-- Keep credentials and secrets out of version control.
-- Survey response submission is available only while the survey is published.
-
+- Survey response submission is allowed only while a survey is published.
+- Authentication and authorization are not implemented in this exercise; do not treat the public API as access-controlled.
