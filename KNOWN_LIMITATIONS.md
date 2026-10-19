@@ -1,54 +1,52 @@
 # QW Survey — Known Limitations
 
-This document records implementation limitations and items that should be verified before submission. It is based on the available project notes and should be checked against the final source code and deployed application. Do not describe an item as a confirmed current defect unless you have reproduced it in the final version.
+This document distinguishes confirmed scope limitations from implementation details that still need verification. Items listed under “Items to verify” should not be treated as confirmed defects until checked against the final code and application.
 
 ## 1. Authentication and authorization
 
-- Authentication and authorization are not implemented in this assignment.
-- The application should be treated as a demonstration project, not a production system for confidential surveys or sensitive responses.
-- Anyone who can reach the public API may be able to call endpoints unless access restrictions are configured outside the application.
+- Authentication and authorization are not implemented.
+- The application is intended as an assignment/demo project, not a production system for confidential surveys or sensitive responses.
+- Anyone who can reach the API may be able to call its endpoints. Do not use real sensitive data without adding suitable access controls.
 
-## 2. Pagination validation should be consistent
+## 2. Items to verify before submission
 
-- The implementation notes indicate that the survey-list endpoint may default or clamp invalid pagination values, while the response-list endpoint validates them more strictly.
-- The assignment expects invalid or over-limit pagination values to be rejected. Verify the current behavior of both endpoints and make them consistent before submission.
-- The API uses `limit` for the page-size parameter in the documented implementation notes, whereas the assignment uses the term `pageSize`. Keep the actual API parameter documented consistently, or align the API with the assignment if needed.
+The following points were identified in earlier implementation notes. Check them against the final repository and remove or update each item after verification.
 
-## 3. Survey description rehydration — verify and fix if still present
+### Pagination validation
 
-- The available architecture notes identify a possible issue in `MongoSurveyRepository.findById()`: the stored description may not be passed to `Survey.rehydrate()`.
-- If this remains in the final code, retrieving a survey by ID may return an empty description even when one was saved. Verify by creating a survey with a description, reloading it through the API, and checking the returned value.
-- If reproduced, pass the stored description into rehydration and add a regression test. Remove this item from the limitations list once it is fixed and verified.
+- Verify that the survey-list and response-list endpoints consistently reject invalid or over-limit pagination values, as required by the assignment.
+- The implementation notes refer to `limit` as the page-size parameter, while the assignment uses the term `pageSize`. Document the actual API parameter consistently. If the two endpoints behave differently, either fix the difference or clearly record the remaining limitation.
 
-## 4. Domain validation boundary
+### Survey description persistence
 
-- The available architecture notes indicate that blank-title validation is performed by the API route and during publication, rather than being enforced by the `Survey` constructor itself.
-- Verify that all entry points and application operations enforce the relevant business rules, not only the HTTP route. If a business rule can be bypassed by calling the domain or application operation directly, consider moving or adding validation at the appropriate boundary.
+- Verify that a survey description is preserved when a survey is saved and then retrieved by ID.
+- Earlier implementation notes identified a possible issue in `MongoSurveyRepository.findById()` where the stored description might not be passed to `Survey.rehydrate()`.
+- If the issue is still present, pass the stored description into rehydration and add a regression test. If the test passes in the final version, remove this item from the document.
 
-## 5. HTTP route responsibilities
+### Domain-level validation
+
+- Verify that business rules are enforced by the domain and application operations, not only by HTTP route validation.
+- Earlier notes indicate that blank-title validation may be handled by the API route and publication operation rather than the `Survey` constructor itself. Check whether invalid state can be created by calling domain or application operations directly. If it can, add validation at the appropriate boundary.
+
+## 3. Architecture trade-off
 
 - Routing, request validation, use-case invocation, and error mapping are combined in the route implementation.
-- This is a pragmatic choice for a small assignment, but separating controller responsibilities and centralizing error handling could make the code easier to maintain as it grows. This is an architectural trade-off, not necessarily a functional defect.
+- This is a pragmatic choice for a small assignment. Separating controller responsibilities and centralizing error handling could improve maintainability as the application grows. This is an architectural trade-off, not necessarily a functional defect.
 
-## 6. Deployment and data protection
+## 4. Deployment and data protection
 
-- Database access depends on the configured MongoDB connection and hosting network settings.
-- Keep MongoDB credentials in backend environment variables only. Do not expose them through frontend variables or commit them to Git.
-- Restrict hosted database network access where practical. Use fictional demo data for the assignment.
+- Database connectivity depends on the configured MongoDB URI and hosting network settings.
+- Keep database credentials in backend environment variables only. Do not expose them through frontend environment variables or commit them to Git.
+- Restrict hosted database network access where practical, and use fictional demo data for the assignment.
 
-## 7. Scope limitations
+## 5. Verification record
 
-- The project does not provide authentication or role-based access control.
-- The project is an assignment-scale survey application and is not intended to be treated as a production survey service without additional security, monitoring, operational safeguards, and review.
+Before final submission, check each item against the final repository:
 
-## Verification record
+- [ ] Confirm that both pagination endpoints reject invalid and over-limit values consistently.
+- [ ] Confirm that a survey description persists after saving and retrieving the survey by ID.
+- [ ] Confirm that the required business rules cannot be bypassed through domain or application operations.
+- [ ] Confirm that `.env` files and database credentials are not committed.
+- [ ] Update or remove any verification item that is no longer applicable.
 
-Before final submission, review each item above against the current repository:
-
-- [ ] Confirmed whether survey pagination rejects invalid and over-limit values consistently.
-- [ ] Confirmed whether `findById()` preserves the survey description after saving and reloading.
-- [ ] Confirmed validation rules are enforced by the relevant domain/application operations as well as the API.
-- [ ] Confirmed `.env` files and database credentials are not committed.
-- [ ] Updated or removed any item above that is no longer applicable.
-
-Only report defects that are present in the final implementation. If an item is fixed, remove it from the active limitations section or record it as fixed and tested.
+Only describe an issue as a confirmed limitation if it remains in the final implementation. Record fixes and test outcomes accurately.
