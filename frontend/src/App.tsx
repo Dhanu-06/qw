@@ -449,11 +449,27 @@ await openSurvey(selectedSurvey.id)
 }
 
 
-  function closeSurveyView() {
-    setSelectedSurvey(null)
-    setSurveyQuestions([])
-    setBuilderError("")
+  
+async function closeSurveyView() {
+  setSelectedSurvey(null)
+  setSurveyQuestions([])
+  setBuilderError("")
+
+  try {
+    setLoadingSurveys(true)
+    setSurveyError("")
+    await refreshSurveys()
+  } catch (error) {
+    setSurveyError(
+      error instanceof Error
+        ? error.message
+        : "Something went wrong."
+    )
+  } finally {
+    setLoadingSurveys(false)
   }
+}
+
 
   
 return (
