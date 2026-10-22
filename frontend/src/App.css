@@ -917,3 +917,11 @@ hr {
   text-align: center;
   font-size: 14px;
 }
+
+.survey-description {
+  margin: 8px 0 20px;
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}

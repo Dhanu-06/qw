@@ -267,6 +267,19 @@ router.post("/:id/close", async (req, res) => {
   }
 })
 
+
+router.get("/stats", async (_req, res) => {
+  try {
+    const stats = await surveyRepository.getStatistics()
+    res.status(200).json(stats)
+  } catch (error) {
+    console.error("Failed to fetch survey statistics:", error)
+    res.status(500).json({
+      message: "Could not fetch survey statistics.",
+    })
+  }
+})
+
 router.get("/:id", async (req, res) => {
   try {
     const survey = await surveyRepository.findById(req.params.id)

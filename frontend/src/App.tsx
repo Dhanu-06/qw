@@ -73,6 +73,12 @@ const [questionOptions, setQuestionOptions] = useState<string[]>(["", ""])
 const [addingQuestion, setAddingQuestion] = useState(false)
   const [builderError, setBuilderError] = useState("")
 
+  const [surveyStats, setSurveyStats] = useState({
+  total: 0,
+  drafts: 0,
+  published: 0,
+})
+
   async function refreshSurveys() {
 
 const query = new URLSearchParams({
@@ -105,12 +111,31 @@ setTotalPages(data.totalPages)
 
   }
 
+
+async function refreshSurveyStats() {
+  const response = await fetch(`${API_URL}/stats`)
+
+  if (!response.ok) {
+    throw new Error("Could not refresh survey statistics.")
+  }
+
+  const data: {
+    total: number
+    drafts: number
+    published: number
+  } = await response.json()
+
+  setSurveyStats(data)
+}
+
+
   useEffect(() => {
     async function loadSurveys() {
       try {
         setLoadingSurveys(true)
         setSurveyError("")
         await refreshSurveys()
+        await refreshSurveyStats()
       } catch (error) {
         setSurveyError(
           error instanceof Error
@@ -153,6 +178,7 @@ setTotalPages(data.totalPages)
       }
 
       await refreshSurveys()
+      await refreshSurveyStats()
       setSurveyTitle("")
       setSurveyDescription("")
       setShowCreateForm(false)
@@ -192,6 +218,7 @@ async function handleShare(surveyId: string) {
       }
 
       const data: Survey = await response.json()
+      console.log("Loaded survey:", data)
 
       setSelectedSurvey(data)
       setSurveyQuestions(data.questions)
@@ -389,8 +416,6 @@ async function saveQuestionEdit(question: Question) {
   }
 }
 
-
-
 async function publishSurvey() {
   if (!selectedSurvey) return
 
@@ -411,6 +436,7 @@ async function publishSurvey() {
 
     setBuilderError("")
     await openSurvey(selectedSurvey.id)
+    await refreshSurveyStats()
   } catch (error) {
     setBuilderError(
       error instanceof Error
@@ -510,9 +536,18 @@ return (
         ← Back to builder
       </button>
 
-      <p className="eyebrow">SURVEY PREVIEW</p>
-      <h1>{selectedSurvey.title}</h1>
-      <p>Review how your survey will appear to respondents.</p>
+      
+<p className="eyebrow">SURVEY PREVIEW</p>
+<h1>{selectedSurvey.title}</h1>
+
+{selectedSurvey.description && (
+  <p className="survey-description">
+    {selectedSurvey.description}
+  </p>
+)}
+
+<p>Review how your survey will appear to respondents.</p>
+
 
       {surveyQuestions.map((question, index) => (
         <article key={question.id} className="survey-row">
@@ -567,8 +602,16 @@ return (
               ← Back to dashboard
             </button>
 
-            <p className="eyebrow">SURVEY DETAILS</p>
-            <h1>{selectedSurvey.title}</h1>
+            
+<p className="eyebrow">SURVEY DETAILS</p>
+<h1>{selectedSurvey.title}</h1>
+
+{selectedSurvey.description?.trim() && (
+  <p className="survey-description">
+    {selectedSurvey.description}
+  </p>
+)}
+
 
             <p>
               Status:{" "}
@@ -630,9 +673,10 @@ return (
     </p>
   )}
 
-            {selectedSurvey.status === "draft" && (
+{selectedSurvey.status === "draft" && (
   <p>You can add questions to this draft survey.</p>
 )}
+
  
 {selectedSurvey.status === "draft" && (
   <div className="create-form">
@@ -985,29 +1029,21 @@ return (
               <article className="stat-card">
                 <span className="stat-icon">▤</span>
                 <p>Total surveys</p>
-                <h2>{surveys.length}</h2>
+                <h2>{surveyStats.total}</h2>
                 <span className="stat-note">Your workspace</span>
               </article>
 
               <article className="stat-card">
                 <span className="stat-icon">◷</span>
                 <p>Drafts</p>
-                <h2>
-                  {surveys.filter(
-                    (survey) => survey.status === "draft"
-                  ).length}
-                </h2>
+                <h2>{surveyStats.drafts}</h2>
                 <span className="stat-note">Still in progress</span>
               </article>
 
               <article className="stat-card">
                 <span className="stat-icon">✓</span>
                 <p>Published</p>
-                <h2>
-                  {surveys.filter(
-                    (survey) => survey.status === "published"
-                  ).length}
-                </h2>
+                <h2>{surveyStats.published}</h2>
                 <span className="stat-note">
                   Collecting feedback
                 </span>

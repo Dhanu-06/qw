@@ -22,7 +22,8 @@ async findAll(): Promise<Survey[]> {
         type: question.type,
         required: question.required,
         options: question.options,
-      }))
+            })),
+      document.description ?? ""
     )
   )
 }
@@ -67,6 +68,21 @@ const filter = status
   return { documents: surveys, total }
 }
 
+
+async getStatistics(): Promise<{
+  total: number
+  drafts: number
+  published: number
+}> {
+  const [total, drafts, published] = await Promise.all([
+    SurveyModel.countDocuments(),
+    SurveyModel.countDocuments({ status: "draft" }),
+    SurveyModel.countDocuments({ status: "published" }),
+  ])
+
+  return { total, drafts, published }
+}
+
   async save(survey: Survey): Promise<void> {
     await SurveyModel.findOneAndUpdate(
       { _id: survey.id },
@@ -89,18 +105,21 @@ async findById(id: string): Promise<Survey | null> {
     return null
   }
 
-  return Survey.rehydrate(
-    document._id.toString(),
-    document.title,
-    document.status,
-    document.questions.map((question) => ({
-      id: question.id,
-      label: question.label,
-      type: question.type,
-      required: question.required,
-      options: question.options,
-    }))
-  )
+  
+return Survey.rehydrate(
+  document._id.toString(),
+  document.title,
+  document.status,
+  document.questions.map((question) => ({
+    id: question.id,
+    label: question.label,
+    type: question.type,
+    required: question.required,
+    options: question.options,
+  })),
+  document.description ?? ""
+)
+
 }
 
 }

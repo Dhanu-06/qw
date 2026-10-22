@@ -10,6 +10,11 @@ describe("CreateSurvey", () => {
   findById: vi.fn(),
   findAll: vi.fn(),
   findPaginated: vi.fn(),
+  getStatistics: vi.fn().mockResolvedValue({
+  total: 0,
+  drafts: 0,
+  published: 0,
+}),
   
 }
     const useCase = new CreateSurvey(repository)
@@ -28,6 +33,11 @@ it("rejects an empty survey title", async () => {
     findById: vi.fn(),
     findAll: vi.fn(),
     findPaginated: vi.fn(),
+    getStatistics: vi.fn().mockResolvedValue({
+  total: 0,
+  drafts: 0,
+  published: 0,
+}),
   }
 
   const useCase = new CreateSurvey(repository)
@@ -45,6 +55,11 @@ it("rejects a survey title longer than 100 characters", async () => {
     findById: vi.fn(),
     findAll: vi.fn(),
     findPaginated: vi.fn(),
+    getStatistics: vi.fn().mockResolvedValue({
+  total: 0,
+  drafts: 0,
+  published: 0,
+}),
   }
 
   const useCase = new CreateSurvey(repository)
@@ -62,6 +77,11 @@ it("rejects a survey description longer than 500 characters", async () => {
     findById: vi.fn(),
     findAll: vi.fn(),
     findPaginated: vi.fn(),
+    getStatistics: vi.fn().mockResolvedValue({
+  total: 0,
+  drafts: 0,
+  published: 0,
+}),
   }
 
   const useCase = new CreateSurvey(repository)
@@ -81,6 +101,11 @@ it("accepts a title of 100 characters and description of 500 characters", async 
     findById: vi.fn(),
     findAll: vi.fn(),
     findPaginated: vi.fn(),
+    getStatistics: vi.fn().mockResolvedValue({
+  total: 0,
+  drafts: 0,
+  published: 0,
+}),
   }
 
   const useCase = new CreateSurvey(repository)
