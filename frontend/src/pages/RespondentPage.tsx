@@ -160,9 +160,12 @@ setValidationErrors({})
 
         
 
-<form onSubmit={handleSubmit}>
+<form className="respondent-form" onSubmit={handleSubmit}>
   {survey.questions.map((question, index) => (
-    <article key={question.id} className="survey-row">
+    <article
+  key={question.id}
+  className="survey-row respondent-question"
+>
       <h3>
         {index + 1}. {question.label}
         {question.required && " *"}
@@ -171,7 +174,8 @@ setValidationErrors({})
 {question.type === "short_text" && (
   <input
     type="text"
-    placeholder="Enter your answer"
+    placeholder="Type your answer..."
+    maxLength={100}
     value={(answers[question.id] as string) ?? ""}
     onChange={(event) =>
       setAnswers({
@@ -184,8 +188,9 @@ setValidationErrors({})
 
 {question.type === "long_text" && (
   <textarea
-    placeholder="Enter your answer"
+    placeholder="Write your answer..."
     rows={4}
+    maxLength={500}
     value={(answers[question.id] as string) ?? ""}
     onChange={(event) =>
       setAnswers({
@@ -195,6 +200,9 @@ setValidationErrors({})
     }
   />
 )}
+
+ 
+
 
 {question.type === "single_choice" && (
   <div>

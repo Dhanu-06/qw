@@ -7,12 +7,14 @@ export class Survey {
   private questions: Question[] = []
 
   
+
 constructor(
   public readonly id: string,
   public title: string,
   public description: string = "",
   public status: SurveyStatus = "draft"
 ) {}
+
 
 
 
@@ -30,17 +32,37 @@ static rehydrate(
   }
 
   survey.questions = questions.map((question) => ({
-    ...question,
-    options: question.options ? [...question.options] : undefined,
-  }))
+  ...question,
+  options: question.options ? [...question.options] : undefined,
+}))
 
-  survey.title = title
-  survey.description = description
-  survey.status = status
+survey.title = title
+survey.description = description
+survey.status = status
 
-  return survey
+survey.validateDetails()
+
+return survey
 }
 
+
+private validateDetails(): void {
+  if (typeof this.title !== "string" || !this.title.trim()) {
+    throw new Error("Survey title cannot be empty.")
+  }
+
+  if (this.title.length > 100) {
+    throw new Error("Survey title cannot exceed 100 characters.")
+  }
+
+  if (typeof this.description !== "string") {
+    throw new Error("Survey description must be a string.")
+  }
+
+  if (this.description.length > 500) {
+    throw new Error("Survey description cannot exceed 500 characters.")
+  }
+}
 
   addQuestion(question: Question): void {
     if (this.status !== "draft") {
@@ -66,46 +88,66 @@ static rehydrate(
   }))
 }
 
-    private validateQuestion(question: Question): void {
-            const validTypes = [
-      "short_text",
-      "long_text",
-      "single_choice",
-      "multiple_choice",
-      "rating",
-    ]
+    
+private validateQuestion(question: Question): void {
+  const validTypes = [
+    "short_text",
+    "long_text",
+    "single_choice",
+    "multiple_choice",
+    "rating",
+  ]
 
-    if (!validTypes.includes(question.type)) {
-      throw new Error("Invalid question type.")
-    }
-    if (!question.label.trim()) {
-      throw new Error("Question label cannot be empty.")
-    }
+  if (!validTypes.includes(question.type)) {
+    throw new Error("Invalid question type.")
+  }
 
-    if (
-      question.type === "single_choice" ||
-      question.type === "multiple_choice"
-    ) {
-      const options = question.options ?? []
-      const cleanedOptions = options.map((option) => option.trim())
+  if (typeof question.label !== "string" || !question.label.trim()) {
+    throw new Error("Question label cannot be empty.")
+  }
 
-      if (cleanedOptions.length < 2) {
-        throw new Error("Choice questions need at least 2 options.")
-      }
+  if (question.label.length > 200) {
+    throw new Error("Question label cannot exceed 200 characters.")
+  }
 
-      if (cleanedOptions.some((option) => !option)) {
-        throw new Error("Options cannot be empty.")
-      }
+  if (
+    question.type === "single_choice" ||
+    question.type === "multiple_choice"
+  ) {
+    const options = question.options ?? []
 
-      if (new Set(cleanedOptions).size !== cleanedOptions.length) {
-        throw new Error("Choice options must be distinct.")
-      }
+    if (!Array.isArray(options)) {
+      throw new Error("Options must be an array.")
     }
 
-    if (question.type === "rating" && question.options !== undefined) {
-      throw new Error("Rating questions do not use options.")
+    if (options.some((option) => typeof option !== "string")) {
+      throw new Error("Every option must be a string.")
+    }
+
+    const cleanedOptions = options.map((option) => option.trim())
+
+    if (cleanedOptions.length < 2) {
+      throw new Error("Choice questions need at least 2 options.")
+    }
+
+    if (cleanedOptions.some((option) => !option)) {
+      throw new Error("Options cannot be empty.")
+    }
+
+    if (cleanedOptions.some((option) => option.length > 100)) {
+      throw new Error("Each option cannot exceed 100 characters.")
+    }
+
+    if (new Set(cleanedOptions).size !== cleanedOptions.length) {
+      throw new Error("Choice options must be distinct.")
     }
   }
+
+  if (question.type === "rating" && question.options !== undefined) {
+    throw new Error("Rating questions do not use options.")
+  }
+}
+
 
     updateQuestion(questionId: string, updatedQuestion: Question): void {
     if (this.status !== "draft") {
@@ -181,6 +223,12 @@ validateAnswers(answers: Answer[]): void {
         if (question.required && !value.trim()) {
           throw new Error("Required question cannot be empty.")
         }
+        const maxLength = question.type === "short_text" ? 100 : 500
+        if (value.length > maxLength) {
+    throw new Error(
+      `${question.type === "short_text" ? "Short text" : "Long text"} answers cannot exceed ${maxLength} characters.`
+    )
+  }
         break
 
       case "single_choice":
@@ -229,25 +277,23 @@ validateAnswers(answers: Answer[]): void {
   }
 }
 
-    publish(): void {
-    if (this.status !== "draft") {
-      throw new Error("Only draft surveys can be published.")
-    }
-
-    if (!this.title.trim()) {
-      throw new Error("Survey title cannot be empty.")
-    }
-
-    if (this.questions.length === 0) {
-      throw new Error("A survey must have at least one question.")
-    }
-
-    for (const question of this.questions) {
-      this.validateQuestion(question)
-    }
-
-    this.status = "published"
+    
+publish(): void {
+  if (this.status !== "draft") {
+    throw new Error("Only draft surveys can be published.")
   }
+
+  this.validateDetails()
+
+  if (this.questions.length === 0) {
+    throw new Error("A survey must have at least one question.")
+  }
+
+  for (const question of this.questions) {
+    this.validateQuestion(question)
+  }
+  this.status = "published"
+}
     close(): void {
     if (this.status !== "published") {
       throw new Error("Only published surveys can be closed.")
@@ -255,5 +301,4 @@ validateAnswers(answers: Answer[]): void {
 
     this.status = "closed"
   }
-
 }

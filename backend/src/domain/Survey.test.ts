@@ -716,4 +716,197 @@ it("accepts valid multiple-choice selections", () => {
   ).not.toThrow()
 })
 
+
+it("accepts a question label of exactly 200 characters", () => {
+  const survey = new Survey("survey-limit-1", "Test Survey")
+
+  expect(() =>
+    survey.addQuestion({
+      id: "q1",
+      label: "Q".repeat(200),
+      type: "short_text",
+      required: true,
+    })
+  ).not.toThrow()
+})
+
+it("rejects a question label longer than 200 characters", () => {
+  const survey = new Survey("survey-limit-2", "Test Survey")
+
+  expect(() =>
+    survey.addQuestion({
+      id: "q1",
+      label: "Q".repeat(201),
+      type: "short_text",
+      required: true,
+    })
+  ).toThrow("Question label cannot exceed 200 characters.")
+})
+
+it("accepts an option of exactly 100 characters", () => {
+  const survey = new Survey("survey-limit-3", "Test Survey")
+
+  expect(() =>
+    survey.addQuestion({
+      id: "q1",
+      label: "Choose an option",
+      type: "single_choice",
+      required: true,
+      options: ["A".repeat(100), "Other"],
+    })
+  ).not.toThrow()
+})
+
+it("rejects an option longer than 100 characters", () => {
+  const survey = new Survey("survey-limit-4", "Test Survey")
+
+  expect(() =>
+    survey.addQuestion({
+      id: "q1",
+      label: "Choose an option",
+      type: "single_choice",
+      required: true,
+      options: ["A".repeat(101), "Other"],
+    })
+  ).toThrow("Each option cannot exceed 100 characters.")
+})
+
+it("accepts a short-text answer of exactly 100 characters", () => {
+  const survey = Survey.rehydrate(
+    "survey-limit-5",
+    "Test Survey",
+    "published",
+    [
+      {
+        id: "q1",
+        label: "Short answer",
+        type: "short_text",
+        required: true,
+      },
+    ]
+  )
+
+  expect(() =>
+    survey.validateAnswers([
+      { questionId: "q1", value: "A".repeat(100) },
+    ])
+  ).not.toThrow()
+})
+
+it("rejects a long-text answer longer than 500 characters", () => {
+  const survey = Survey.rehydrate(
+    "survey-limit-6",
+    "Test Survey",
+    "published",
+    [
+      {
+        id: "q1",
+        label: "Long answer",
+        type: "long_text",
+        required: true,
+      },
+    ]
+  )
+
+  expect(() =>
+    survey.validateAnswers([
+      { questionId: "q1", value: "A".repeat(501) },
+    ])
+  ).toThrow(
+    "Long text answers cannot exceed 500 characters."
+  )
+})
+it("rejects a short-text answer longer than 100 characters", () => {
+  const survey = Survey.rehydrate(
+    "survey-limit-7",
+    "Test Survey",
+    "published",
+    [
+      {
+        id: "q1",
+        label: "Short answer",
+        type: "short_text",
+        required: true,
+      },
+    ]
+  )
+
+  expect(() =>
+    survey.validateAnswers([
+      { questionId: "q1", value: "A".repeat(101) },
+    ])
+  ).toThrow("Short text answers cannot exceed 100 characters.")
+})
+
+it("accepts a long-text answer of exactly 500 characters", () => {
+  const survey = Survey.rehydrate(
+    "survey-limit-8",
+    "Test Survey",
+    "published",
+    [
+      {
+        id: "q1",
+        label: "Long answer",
+        type: "long_text",
+        required: true,
+      },
+    ]
+  )
+
+  expect(() =>
+    survey.validateAnswers([
+      { questionId: "q1", value: "A".repeat(500) },
+    ])
+  ).not.toThrow()
+})
+
+it("should reject updating a question with a label longer than 200 characters", () => {
+  const survey = new Survey("survey-update-1", "Test Survey")
+
+  const question: Question = {
+    id: "q1",
+    label: "Original question",
+    type: "short_text",
+    required: true,
+  }
+
+  survey.addQuestion(question)
+
+  const updatedQuestion: Question = {
+    ...question,
+    label: "Q".repeat(201),
+  }
+
+  expect(() => survey.updateQuestion("q1", updatedQuestion)).toThrow(
+    "Question label cannot exceed 200 characters."
+  )
+
+  expect(survey.getQuestions()[0].label).toBe("Original question")
+})
+
+it("should reject updating a choice option longer than 100 characters", () => {
+  const survey = new Survey("survey-update-2", "Test Survey")
+
+  const question: Question = {
+    id: "q1",
+    label: "Choose an option",
+    type: "single_choice",
+    required: true,
+    options: ["Option A", "Option B"],
+  }
+
+  survey.addQuestion(question)
+
+  const updatedQuestion: Question = {
+    ...question,
+    options: ["A".repeat(101), "Option B"],
+  }
+
+  expect(() => survey.updateQuestion("q1", updatedQuestion)).toThrow(
+    "Each option cannot exceed 100 characters."
+  )
+
+  expect(survey.getQuestions()[0].options).toEqual(["Option A", "Option B"])
+})
+
 })

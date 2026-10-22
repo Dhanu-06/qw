@@ -37,6 +37,15 @@ const [surveyDescription, setSurveyDescription] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [sharedSurveyId, setSharedSurveyId] = useState<string | null>(null)
+  useEffect(() => {
+  if (!sharedSurveyId) return
+
+  const timeoutId = window.setTimeout(() => {
+    setSharedSurveyId(null)
+  }, 2500)
+
+  return () => window.clearTimeout(timeoutId)
+}, [sharedSurveyId])
   const [surveys, setSurveys] = useState<Survey[]>([])
 
 const [currentPage, setCurrentPage] = useState(1)
@@ -54,6 +63,7 @@ const [statusFilter, setStatusFilter] = useState("all")
   const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null)
 const [editQuestionLabel, setEditQuestionLabel] = useState("")
 const [editQuestionRequired, setEditQuestionRequired] = useState(true)
+const [editQuestionOptions, setEditQuestionOptions] = useState<string[]>([])
 const [savingEdit, setSavingEdit] = useState(false)
   const [questionLabel, setQuestionLabel] = useState("")
 const [questionType, setQuestionType] =
@@ -157,6 +167,7 @@ setTotalPages(data.totalPages)
     }
   }
   
+
 async function handleShare(surveyId: string) {
   const link = `${window.location.origin}/surveys/${surveyId}/respond`
 
@@ -334,11 +345,14 @@ async function saveQuestionEdit(question: Question) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          label: editQuestionLabel.trim(),
-          type: question.type,
-          required: editQuestionRequired,
-          ...(question.options ? { options: question.options } : {}),
-        }),
+  label: editQuestionLabel.trim(),
+  type: question.type,
+  required: editQuestionRequired,
+  ...(question.type === "single_choice" ||
+  question.type === "multiple_choice"
+    ? { options: editQuestionOptions }
+    : {}),
+}),
       }
     )
 
@@ -362,6 +376,7 @@ async function saveQuestionEdit(question: Question) {
     setSurveyQuestions(updatedSurvey.questions)
     setEditingQuestionId(null)
     setEditQuestionLabel("")
+    setEditQuestionOptions([])
     await refreshSurveys()
   } catch (error) {
     setBuilderError(
@@ -373,6 +388,7 @@ async function saveQuestionEdit(question: Question) {
     setSavingEdit(false)
   }
 }
+
 
 
 async function publishSurvey() {
@@ -393,6 +409,7 @@ async function publishSurvey() {
       throw new Error(data.message || "Could not publish survey.")
     }
 
+    setBuilderError("")
     await openSurvey(selectedSurvey.id)
   } catch (error) {
     setBuilderError(
@@ -402,6 +419,7 @@ async function publishSurvey() {
     )
   }
 }
+
 
 async function closeSurvey() {
   if (!selectedSurvey) return
@@ -418,7 +436,8 @@ async function closeSurvey() {
       throw new Error(data.message || "Failed to close survey.")
     }
 
-    await openSurvey(selectedSurvey.id)
+    setBuilderError("")
+await openSurvey(selectedSurvey.id)
     alert("Survey closed successfully!")
   } catch (error) {
     alert(
@@ -587,13 +606,14 @@ return (
     Close survey
   </button>
 )}
+    
+{selectedSurvey.status === "draft" &&
+  surveyQuestions.length >= 5 && (
+    <p className="error-message">
+      You've reached the maximum of 5 questions for this survey.
+    </p>
+  )}
 
-
-            {surveyQuestions.length >= 5 && (
-  <p className="error-message">
-    You've reached the maximum of 5 questions for this survey.
-  </p>
-)}
             {selectedSurvey.status === "draft" && (
   <p>You can add questions to this draft survey.</p>
 )}
@@ -605,6 +625,7 @@ return (
     <label htmlFor="question-label">Question text</label>
     <input
       id="question-label"
+      maxLength={200}
       value={questionLabel}
       onChange={(event) => setQuestionLabel(event.target.value)}
       placeholder="Enter your question"
@@ -633,6 +654,7 @@ return (
     {questionOptions.map((option, index) => (
       <div key={index}>
         <input
+        maxLength={100}
           value={option}
           placeholder={`Option ${index + 1}`}
           onChange={(event) => {
@@ -669,7 +691,7 @@ return (
 )}
 
 
-    <label>
+    <label className="required-checkbox">
       <input
         type="checkbox"
         checked={questionRequired}
@@ -717,13 +739,59 @@ return (
 
     <input
       id={`edit-question-${question.id}`}
+      maxLength={200}
       value={editQuestionLabel}
       onChange={(event) =>
         setEditQuestionLabel(event.target.value)
       }
     />
 
-    <label>
+{question.type === "single_choice" ||
+ question.type === "multiple_choice" ? (
+  <div>
+    <label>Answer options</label>
+
+    {editQuestionOptions.map((option, index) => (
+      <div key={index}>
+        <input
+          maxLength={100}
+          value={option}
+          placeholder={`Option ${index + 1}`}
+          onChange={(event) => {
+            const updatedOptions = [...editQuestionOptions]
+            updatedOptions[index] = event.target.value
+            setEditQuestionOptions(updatedOptions)
+          }}
+        />
+
+        <button
+          type="button"
+          className="secondary-button"
+          onClick={() => {
+            setEditQuestionOptions(
+              editQuestionOptions.filter((_, i) => i !== index)
+            )
+          }}
+          disabled={editQuestionOptions.length <= 2}
+        >
+          Remove
+        </button>
+      </div>
+    ))}
+
+    <button
+      type="button"
+      className="secondary-button"
+      onClick={() => setEditQuestionOptions([...editQuestionOptions, ""])}
+      disabled={editQuestionOptions.length >= 20}
+    >
+      Add option
+    </button>
+  </div>
+) : null}
+
+
+    <label className="required-checkbox">
       <input
         type="checkbox"
         checked={editQuestionRequired}
@@ -785,6 +853,7 @@ return (
       setEditingQuestionId(question.id)
       setEditQuestionLabel(question.label)
       setEditQuestionRequired(question.required)
+      setEditQuestionOptions(question.options ? [...question.options] : [])
       setBuilderError("")
     }}
   >
@@ -841,22 +910,29 @@ return (
               <section className="create-form">
                 <h2>Create your survey</h2>
 
-                <label htmlFor="survey-title">Survey title</label>
-                <input
-                  id="survey-title"
-                  value={surveyTitle}
-                  onChange={(event) =>
-                    setSurveyTitle(event.target.value)
-                  }
-                  placeholder="e.g. New Employee Onboarding"
-                />
                 
+
+<label htmlFor="survey-title">Survey title</label>
+<input
+  id="survey-title"
+  maxLength={100}
+  value={surveyTitle}
+  onChange={(event) => setSurveyTitle(event.target.value)}
+  placeholder="e.g. New Employee Onboarding"
+/>
+
+<label htmlFor="survey-description">
+  Survey description (optional)
+</label>
 <textarea
+  id="survey-description"
+  maxLength={500}
   value={surveyDescription}
-  onChange={(e) => setSurveyDescription(e.target.value)}
+  onChange={(event) => setSurveyDescription(event.target.value)}
   placeholder="Survey description (optional)"
   rows={3}
 />
+
 
                 {error && (
                   <p role="alert" className="error-message">
@@ -929,7 +1005,7 @@ return (
               </div>
 
               {loadingSurveys ? (
-                <p>Loading surveys...</p>
+                <p className="loading-message">Loading surveys...</p>
               ) : surveyError ? (
                 <p role="alert" className="error-message">
                   {surveyError}
@@ -1013,11 +1089,6 @@ return (
     </button>
   )}
 </div>
-{sharedSurveyId === survey.id && (
-  <p role="status" className="share-message">
-    Link copied!
-  </p>
-)}
                     </article>
                   ))}
 
@@ -1056,6 +1127,11 @@ return (
           
           </>
         )}
+            {sharedSurveyId && (
+        <div className="share-toast" role="status">
+          ✓ Link copied!
+        </div>
+      )}
       </main>
     </div>
       }
@@ -1063,6 +1139,4 @@ return (
   </Routes>
 )
 }
-
-
 export default App

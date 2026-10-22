@@ -151,15 +151,18 @@ useEffect(() => {
   }
 
   return (
-    <main className="dashboard">
-      <section className="create-form">
+    <main className="dashboard results-page">
+  <section className="results-container">
         <p className="eyebrow">SURVEY RESULTS</p>
         <h1>{results.survey.title}</h1>
         <p>Total responses: {results.totalResponses}</p>
 
         
 {results.questionResults.map((question) => (
-  <article key={question.questionId} className="survey-row">
+  <article
+  key={question.questionId}
+  className="results-question-card"
+>
     <h3>{question.label}</h3>
     <p>Type: {question.type.replace("_", " ")}</p>
 
@@ -262,7 +265,7 @@ useEffect(() => {
   </article>
 ))}
 
-<div className="survey-section">
+<div className="survey-section submitted-responses">
   <h2>Submitted responses</h2>
   <p>Browse individual responses submitted to this survey.</p>
 
@@ -291,7 +294,7 @@ useEffect(() => {
           responseData.responses.map((response, index) => (
             <article
               key={response.id}
-              className="survey-row"
+              className="submitted-response-card"
             >
               <div>
                 <h3>
