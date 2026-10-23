@@ -78,38 +78,43 @@ const [addingQuestion, setAddingQuestion] = useState(false)
   drafts: 0,
   published: 0,
 })
+const [searchTerm, setSearchTerm] = useState("")
+const [sortBy, setSortBy] = useState<
+  "newest" | "name-asc" | "name-desc"
+>("newest")
 
   async function refreshSurveys() {
+  const query = new URLSearchParams({
+    page: String(currentPage),
+    limit: "5",
+  })
 
-const query = new URLSearchParams({
-  page: String(currentPage),
-  limit: "5",
-})
-
-if (statusFilter !== "all") {
-  query.set("status", statusFilter)
-}
-
-const response = await fetch(`${API_URL}?${query.toString()}`)
-
-
-    if (!response.ok) {
-      throw new Error("Could not refresh surveys.")
-    }
-
-    
-
-const data: {
-  surveys: Survey[]
-  page: number
-  totalPages: number
-} = await response.json()
-
-setSurveys(data.surveys)
-setCurrentPage(data.page)
-setTotalPages(data.totalPages)
-
+  if (statusFilter !== "all") {
+    query.set("status", statusFilter)
   }
+
+  if (searchTerm.trim()) {
+    query.set("search", searchTerm.trim())
+  }
+
+  query.set("sortBy", sortBy)
+
+  const response = await fetch(`${API_URL}?${query.toString()}`)
+
+  if (!response.ok) {
+    throw new Error("Could not refresh surveys.")
+  }
+
+  const data: {
+    surveys: Survey[]
+    page: number
+    totalPages: number
+  } = await response.json()
+
+  setSurveys(data.surveys)
+  setCurrentPage(data.page)
+  setTotalPages(data.totalPages)
+}
 
 
 async function refreshSurveyStats() {
@@ -130,25 +135,24 @@ async function refreshSurveyStats() {
 
 
   useEffect(() => {
-    async function loadSurveys() {
-      try {
-        setLoadingSurveys(true)
-        setSurveyError("")
-        await refreshSurveys()
-        await refreshSurveyStats()
-      } catch (error) {
-        setSurveyError(
-          error instanceof Error
-            ? error.message
-            : "Something went wrong."
-        )
-      } finally {
-        setLoadingSurveys(false)
-      }
+  async function loadSurveys() {
+    try {
+      setSurveyError("")
+      await refreshSurveys()
+      await refreshSurveyStats()
+    } catch (error) {
+      setSurveyError(
+        error instanceof Error
+          ? error.message
+          : "Something went wrong."
+      )
+    } finally {
+      setLoadingSurveys(false)
     }
+  }
 
-    loadSurveys()
-  }, [currentPage, statusFilter])
+  loadSurveys()
+}, [currentPage, statusFilter, searchTerm, sortBy])
 
   async function handleCreateSurvey() {
     if (!surveyTitle.trim()) {
@@ -1062,8 +1066,10 @@ return (
                 <p role="alert" className="error-message">
                   {surveyError}
                 </p>
-              ) : surveys.length === 0 ? (
-                <div className="empty-state">
+              ) : surveys.length === 0 &&
+  !searchTerm.trim() &&
+  statusFilter === "all" ? (
+  <div className="empty-state">
                   <div className="empty-icon">▤</div>
                   <h3>Your first survey starts here</h3>
                   <p>
@@ -1082,27 +1088,71 @@ return (
               ) : (
                 <>
 <div className="filter-controls">
-  <label htmlFor="survey-status-filter">
-    Filter by status:
-  </label>
+  <div>
+    <label htmlFor="survey-search">
+      Search surveys:
+    </label>
+    <input
+      id="survey-search"
+      type="search"
+      placeholder="Search by survey name..."
+      value={searchTerm}
+      onChange={(event) => {
+        setSearchTerm(event.target.value)
+        setCurrentPage(1)
+      }}
+    />
+  </div>
 
-  <select
-    id="survey-status-filter"
-    value={statusFilter}
-    onChange={(event) => {
-      setStatusFilter(event.target.value)
-      setCurrentPage(1)
-    }}
-  >
-    <option value="all">All surveys</option>
-    <option value="draft">Draft</option>
-    <option value="published">Published</option>
-    <option value="closed">Closed</option>
-  </select>
+  <div>
+    <label htmlFor="survey-status-filter">
+      Filter by status:
+    </label>
+
+    <select
+      id="survey-status-filter"
+      value={statusFilter}
+      onChange={(event) => {
+        setStatusFilter(event.target.value)
+        setCurrentPage(1)
+      }}
+    >
+      <option value="all">All surveys</option>
+      <option value="draft">Draft</option>
+      <option value="published">Published</option>
+      <option value="closed">Closed</option>
+    </select>
+  </div>
+
+  <div>
+    <label htmlFor="survey-sort">
+      Sort by:
+    </label>
+
+    <select
+      id="survey-sort"
+      value={sortBy}
+      onChange={(event) => {
+        setSortBy(
+          event.target.value as "newest" | "name-asc" | "name-desc"
+        )
+        setCurrentPage(1)
+      }}
+    >
+      <option value="newest">Newest first</option>
+      <option value="name-asc">Name: A–Z</option>
+      <option value="name-desc">Name: Z–A</option>
+    </select>
+  </div>
 </div>
 
                 <div className="survey-list">
-                  {surveys.map((survey) => (
+  {surveys.length === 0 ? (
+    <p className="empty-state">
+      No surveys found. Try a different search or status filter.
+    </p>
+  ) : (
+    surveys.map((survey) => (
                     <article
                       className="survey-row"
                       key={survey.id}
@@ -1142,8 +1192,8 @@ return (
   )}
 </div>
                     </article>
-                  ))}
-
+                  ))
+                )}
 
                   <div className="pagination-controls">
                     <button

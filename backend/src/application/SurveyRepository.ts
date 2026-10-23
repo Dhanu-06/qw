@@ -6,10 +6,12 @@ export interface SurveyRepository {
   findById(id: string): Promise<Survey | null>
   findAll(): Promise<Survey[]>
   findPaginated(
-    page: number,
-    limit: number,
-    status?: string
-  ): Promise<{ documents: Survey[]; total: number }>
+  page: number,
+  limit: number,
+  status?: string,
+  search?: string,
+  sortBy?: "newest" | "name-asc" | "name-desc"
+): Promise<{ documents: Survey[]; total: number }>
   getStatistics(): Promise<{
     total: number
     drafts: number

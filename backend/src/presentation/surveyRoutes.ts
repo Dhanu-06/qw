@@ -9,6 +9,7 @@ import { DeleteQuestion } from "../application/DeleteQuestion"
 import { SubmitSurveyResponse } from "../application/SubmitSurveyResponse"
 import { MongoSurveyResponseRepository } from "../infrastructure/MongoSurveyResponseRepository"
 import { GetSurveyResults } from "../application/GetSurveyResults"
+import { isValidUuid } from "./validateUuid"
 
 const router = Router()
 const surveyRepository = new MongoSurveyRepository()
@@ -77,8 +78,27 @@ router.get("/", async (req, res) => {
         ? req.query.status
         : undefined
 
+        const search =
+  typeof req.query.search === "string"
+    ? req.query.search.trim()
+    : undefined
+
+const validSortOptions = ["newest", "name-asc", "name-desc"]
+
+const sortBy =
+  typeof req.query.sortBy === "string" &&
+  validSortOptions.includes(req.query.sortBy)
+    ? (req.query.sortBy as "newest" | "name-asc" | "name-desc")
+    : "newest"
+
     const { documents: paginatedSurveys, total } =
-      await surveyRepository.findPaginated(page, limit, status)
+      await surveyRepository.findPaginated(
+  page,
+  limit,
+  status,
+  search,
+  sortBy
+)
 
     res.status(200).json({
       surveys: paginatedSurveys.map((survey) => ({
@@ -306,14 +326,28 @@ router.get("/:id", async (req, res) => {
 
 router.delete("/:id/questions/:questionId", async (req, res) => {
   try {
-    const survey = await deleteQuestion.execute(
-      req.params.id,
-      req.params.questionId
-    )
+    const { id, questionId } = req.params
+
+    if (!isValidUuid(id)) {
+      res.status(400).json({
+        message: "Invalid survey ID format.",
+      })
+      return
+    }
+
+    if (!isValidUuid(questionId)) {
+      res.status(400).json({
+        message: "Invalid question ID format.",
+      })
+      return
+    }
+
+    const survey = await deleteQuestion.execute(id, questionId)
 
     res.status(200).json({
       id: survey.id,
       title: survey.title,
+      description: survey.description,
       status: survey.status,
       questions: survey.getQuestions(),
     })
@@ -322,6 +356,11 @@ router.delete("/:id/questions/:questionId", async (req, res) => {
       error instanceof Error ? error.message : "Unexpected error."
 
     if (message === "Survey not found.") {
+      res.status(404).json({ message })
+      return
+    }
+
+    if (message === "Question not found.") {
       res.status(404).json({ message })
       return
     }

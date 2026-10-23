@@ -32,17 +32,33 @@ async findAll(): Promise<Survey[]> {
 async findPaginated(
   page: number,
   limit: number,
-  status?: string
+  status?: string,
+  search?: string,
+  sortBy: "newest" | "name-asc" | "name-desc" = "newest"
 ): Promise<{ documents: Survey[]; total: number }> {
-  
-const filter = status
-  ? { status: status as "draft" | "published" | "closed" }
-  : {}
+  const filter: Record<string, unknown> = {}
 
+  if (status) {
+    filter.status = status
+  }
+
+  if (search?.trim()) {
+    filter.title = {
+      $regex: search.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+      $options: "i",
+    }
+  }
+
+  const sort: Record<string, 1 | -1> =
+  sortBy === "name-asc"
+    ? { title: 1, _id: 1 }
+    : sortBy === "name-desc"
+      ? { title: -1, _id: 1 }
+      : { createdAt: -1, _id: 1 }
 
   const [documents, total] = await Promise.all([
     SurveyModel.find(filter)
-      .sort({ createdAt: -1, _id: 1 })
+      .sort(sort)
       .skip((page - 1) * limit)
       .limit(limit)
       .lean(),
@@ -67,7 +83,6 @@ const filter = status
 
   return { documents: surveys, total }
 }
-
 
 async getStatistics(): Promise<{
   total: number

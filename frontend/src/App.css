@@ -925,3 +925,236 @@ hr {
   line-height: 1.7;
   overflow-wrap: anywhere;
 }
+
+
+/* ===== Survey filters ===== */
+
+.filter-controls {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.6fr) minmax(170px, 1fr) minmax(160px, 1fr);
+  gap: 20px;
+  align-items: end;
+  margin: 28px 0 24px;
+  padding: 20px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+}
+
+.filter-controls > div {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.filter-controls label {
+  color: #475569;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.filter-controls input,
+.filter-controls select {
+  box-sizing: border-box;
+  width: 100%;
+  height: 44px;
+  padding: 0 13px;
+  color: #1e293b;
+  font: inherit;
+  font-size: 14px;
+  background: #ffffff;
+  border: 1px solid #d7dee8;
+  border-radius: 9px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.filter-controls input::placeholder {
+  color: #94a3b8;
+}
+
+.filter-controls input:focus,
+.filter-controls select:focus {
+  border-color: #f97316;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.13);
+}
+
+/* ===== Survey list ===== */
+
+.survey-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.survey-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.025);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.survey-row:hover {
+  border-color: #fed7aa;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+}
+
+.survey-row > div:first-child {
+  min-width: 0;
+}
+
+.survey-row h3 {
+  margin: 0 0 9px;
+  color: #1e293b;
+  font-size: 18px;
+  font-weight: 650;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.survey-row p {
+  margin: 5px 0 0;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ===== Status and action buttons ===== */
+
+.survey-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 11px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.2;
+  text-transform: capitalize;
+}
+
+.status-draft {
+  color: #9a3412;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+}
+
+.status-published {
+  color: #166534;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+}
+
+.status-closed {
+  color: #475569;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+}
+
+.survey-actions .secondary-button {
+  min-height: 42px;
+  padding: 0 17px;
+  border: 1px solid #d7dee8;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.survey-actions .secondary-button:hover {
+  color: #ea580c;
+  border-color: #fdba74;
+  background: #fff7ed;
+}
+
+/* ===== Empty and pagination states ===== */
+
+.survey-list > .empty-state {
+  padding: 36px 20px;
+  text-align: center;
+  color: #64748b;
+  background: #ffffff;
+  border: 1px dashed #cbd5e1;
+  border-radius: 14px;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 20px 0 8px;
+}
+
+.pagination-controls button {
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid #d7dee8;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #334155;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pagination-controls button:hover:not(:disabled) {
+  color: #ea580c;
+  border-color: #fdba74;
+}
+
+.pagination-controls button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ===== Responsive layout ===== */
+
+@media (max-width: 760px) {
+  .filter-controls {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .survey-row {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 18px;
+    padding: 20px;
+  }
+
+  .survey-actions {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 420px) {
+  .survey-actions {
+    gap: 8px;
+  }
+
+  .survey-actions .secondary-button {
+    padding: 0 12px;
+  }
+}
