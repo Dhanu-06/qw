@@ -5,6 +5,7 @@ import "./App.css"
 import { Routes, Route } from 'react-router-dom'
 import RespondentPage from './pages/RespondentPage'
 import ResultsPage from './pages/ResultsPage'
+import { useQuery, useQueryClient, } from "@tanstack/react-query"
 
 
 type Question = {
@@ -26,6 +27,12 @@ export type Survey = {
   description: string
   status: "draft" | "published" | "closed"
   questions: Question[]
+}
+
+type SurveyStats = {
+  total: number
+  drafts: number
+  published: number
 }
 
 const API_URL = `${import.meta.env.VITE_API_URL}/surveys`;
@@ -71,17 +78,28 @@ const [questionType, setQuestionType] =
 const [questionRequired, setQuestionRequired] = useState(true)
 const [questionOptions, setQuestionOptions] = useState<string[]>(["", ""])
 const [addingQuestion, setAddingQuestion] = useState(false)
-  const [builderError, setBuilderError] = useState("")
-
-  const [surveyStats, setSurveyStats] = useState({
-  total: 0,
-  drafts: 0,
-  published: 0,
-})
+const [builderError, setBuilderError] = useState("")
 const [searchTerm, setSearchTerm] = useState("")
 const [sortBy, setSortBy] = useState<
   "newest" | "name-asc" | "name-desc"
 >("newest")
+const queryClient = useQueryClient()
+const {
+  data: surveyStats,
+  isLoading: loadingSurveyStats,
+  error: surveyStatsError,
+} = useQuery<SurveyStats>({
+  queryKey: ["surveyStats"],
+  queryFn: async () => {
+    const response = await fetch(`${API_URL}/stats`)
+
+    if (!response.ok) {
+      throw new Error("Could not refresh survey statistics.")
+    }
+
+    return response.json() as Promise<SurveyStats>
+  },
+})
 
   async function refreshSurveys() {
   const query = new URLSearchParams({
@@ -117,29 +135,11 @@ const [sortBy, setSortBy] = useState<
 }
 
 
-async function refreshSurveyStats() {
-  const response = await fetch(`${API_URL}/stats`)
-
-  if (!response.ok) {
-    throw new Error("Could not refresh survey statistics.")
-  }
-
-  const data: {
-    total: number
-    drafts: number
-    published: number
-  } = await response.json()
-
-  setSurveyStats(data)
-}
-
-
   useEffect(() => {
   async function loadSurveys() {
     try {
       setSurveyError("")
       await refreshSurveys()
-      await refreshSurveyStats()
     } catch (error) {
       setSurveyError(
         error instanceof Error
@@ -182,7 +182,9 @@ async function refreshSurveyStats() {
       }
 
       await refreshSurveys()
-      await refreshSurveyStats()
+      await queryClient.invalidateQueries({
+  queryKey: ["surveyStats"],
+})
       setSurveyTitle("")
       setSurveyDescription("")
       setShowCreateForm(false)
@@ -440,7 +442,9 @@ async function publishSurvey() {
 
     setBuilderError("")
     await openSurvey(selectedSurvey.id)
-    await refreshSurveyStats()
+    await queryClient.invalidateQueries({
+  queryKey: ["surveyStats"],
+})
   } catch (error) {
     setBuilderError(
       error instanceof Error
@@ -1028,26 +1032,31 @@ return (
                 </div>
               </section>
             )}
+            {loadingSurveyStats && <p>Loading statistics...</p>}
+
+{surveyStatsError && (
+  <p>{surveyStatsError.message}</p>
+)}
 
             <section className="stats">
               <article className="stat-card">
                 <span className="stat-icon">▤</span>
                 <p>Total surveys</p>
-                <h2>{surveyStats.total}</h2>
+                <h2>{surveyStats?.total ?? 0}</h2>
                 <span className="stat-note">Your workspace</span>
               </article>
 
               <article className="stat-card">
                 <span className="stat-icon">◷</span>
                 <p>Drafts</p>
-                <h2>{surveyStats.drafts}</h2>
+                <h2>{surveyStats?.drafts ?? 0}</h2>
                 <span className="stat-note">Still in progress</span>
               </article>
 
               <article className="stat-card">
                 <span className="stat-icon">✓</span>
                 <p>Published</p>
-                <h2>{surveyStats.published}</h2>
+                <h2>{surveyStats?.published ?? 0}</h2>
                 <span className="stat-note">
                   Collecting feedback
                 </span>
