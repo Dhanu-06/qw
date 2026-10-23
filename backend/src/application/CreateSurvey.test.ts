@@ -8,7 +8,6 @@ describe("CreateSurvey", () => {
     const repository: SurveyRepository = {
   save: vi.fn(),
   findById: vi.fn(),
-  findAll: vi.fn(),
   findPaginated: vi.fn(),
   getStatistics: vi.fn().mockResolvedValue({
   total: 0,
@@ -31,7 +30,7 @@ it("rejects an empty survey title", async () => {
   const repository: SurveyRepository = {
     save: vi.fn(),
     findById: vi.fn(),
-    findAll: vi.fn(),
+    //findAll: vi.fn(),
     findPaginated: vi.fn(),
     getStatistics: vi.fn().mockResolvedValue({
   total: 0,
@@ -53,7 +52,6 @@ it("rejects a survey title longer than 100 characters", async () => {
   const repository: SurveyRepository = {
     save: vi.fn(),
     findById: vi.fn(),
-    findAll: vi.fn(),
     findPaginated: vi.fn(),
     getStatistics: vi.fn().mockResolvedValue({
   total: 0,
@@ -75,7 +73,7 @@ it("rejects a survey description longer than 500 characters", async () => {
   const repository: SurveyRepository = {
     save: vi.fn(),
     findById: vi.fn(),
-    findAll: vi.fn(),
+    //findAll: vi.fn(),
     findPaginated: vi.fn(),
     getStatistics: vi.fn().mockResolvedValue({
   total: 0,
@@ -99,7 +97,7 @@ it("accepts a title of 100 characters and description of 500 characters", async 
   const repository: SurveyRepository = {
     save: vi.fn(),
     findById: vi.fn(),
-    findAll: vi.fn(),
+   // findAll: vi.fn(),
     findPaginated: vi.fn(),
     getStatistics: vi.fn().mockResolvedValue({
   total: 0,

@@ -5,30 +5,6 @@ import { SurveyModel } from "./SurveyModel"
 
 export class MongoSurveyRepository implements SurveyRepository {
 
-
-async findAll(): Promise<Survey[]> {
-  const documents = await SurveyModel.find()
-    .sort({ createdAt: -1, _id: 1 })
-    .lean()
-
-  return documents.map((document) =>
-    Survey.rehydrate(
-      document._id.toString(),
-      document.title,
-      document.status,
-      document.questions.map((question) => ({
-        id: question.id,
-        label: question.label,
-        type: question.type,
-        required: question.required,
-        options: question.options,
-            })),
-      document.description ?? ""
-    )
-  )
-}
-
-
 async findPaginated(
   page: number,
   limit: number,

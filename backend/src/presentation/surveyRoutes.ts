@@ -31,6 +31,7 @@ const getSurveyResults = new GetSurveyResults(
 router.post("/", async (req, res) => {
   try {
     const { title } = req.body
+    console.info("[Survey] Create request received")
 
     if (typeof title !== "string" || !title.trim()) {
       res.status(400).json({
@@ -48,6 +49,9 @@ const survey = await createSurvey.execute(
   title.trim(),
   description
 )
+console.info("[Survey] Created successfully", {
+  surveyId: survey.id,
+})
 
     res.status(201).json({
       id: survey.id,
@@ -99,6 +103,13 @@ const sortBy =
   search,
   sortBy
 )
+console.debug("[Survey] Fetching survey list", {
+  page,
+  limit,
+  status,
+  sortBy,
+  hasSearch: Boolean(search),
+})
 
     res.status(200).json({
       surveys: paginatedSurveys.map((survey) => ({
@@ -114,6 +125,7 @@ const sortBy =
       totalPages: Math.ceil(total / limit),
     })
   } catch (error) {
+    console.error("[Survey] Failed to fetch survey list", error)
     const message =
       error instanceof Error
         ? error.message
@@ -127,7 +139,10 @@ const sortBy =
 router.post("/:id/questions", async (req, res) => {
   try {
     const { label, type, required, options } = req.body
-
+    console.info("[Survey] Add question request received", {
+  surveyId: req.params.id,
+  questionType: type,
+})
     const validTypes = [
       "short_text",
       "long_text",
@@ -143,6 +158,9 @@ router.post("/:id/questions", async (req, res) => {
       !validTypes.includes(type) ||
       typeof required !== "boolean"
     ) {
+      console.warn("[Survey] Invalid question data", {
+  surveyId: req.params.id,
+})
       res.status(400).json({ message: "Invalid question data." })
       return
     }
@@ -159,6 +177,10 @@ router.post("/:id/questions", async (req, res) => {
       req.params.id,
       question
     )
+    console.info("[Survey] Question added successfully", {
+  surveyId: survey.id,
+  questionId: question.id,
+})
 
     res.status(201).json({
       id: survey.id,
@@ -167,22 +189,34 @@ router.post("/:id/questions", async (req, res) => {
       questions: survey.getQuestions(),
     })
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Unexpected error."
+  const message =
+    error instanceof Error ? error.message : "Unexpected error."
 
-    if (message === "Survey not found.") {
-      res.status(404).json({ message })
-      return
-    }
+  if (message === "Survey not found.") {
+    console.warn("[Survey] Cannot add question: survey not found", {
+      surveyId: req.params.id,
+    })
 
-    res.status(400).json({ message })
+    res.status(404).json({ message })
+    return
   }
+
+  console.error("[Survey] Failed to add question", {
+    surveyId: req.params.id,
+    error,
+  })
+
+  res.status(400).json({ message })
+}
 })
 
 router.put("/:id/questions/:questionId", async (req, res) => {
   try {
     const { label, type, required, options } = req.body
-
+    console.info("[Survey] Update question request received", {
+  surveyId: req.params.id,
+  questionId: req.params.questionId,
+})
     const validTypes = [
       "short_text",
       "long_text",
@@ -197,6 +231,10 @@ router.put("/:id/questions/:questionId", async (req, res) => {
       !validTypes.includes(type) ||
       typeof required !== "boolean"
     ) {
+      console.warn("[Survey] Invalid question update data", {
+  surveyId: req.params.id,
+  questionId: req.params.questionId,
+})
       res.status(400).json({ message: "Invalid question data." })
       return
     }
@@ -214,7 +252,10 @@ router.put("/:id/questions/:questionId", async (req, res) => {
       req.params.questionId,
       question
     )
-
+    console.info("[Survey] Question updated successfully", {
+  surveyId: survey.id,
+  questionId: req.params.questionId,
+})
     res.status(200).json({
       id: survey.id,
       title: survey.title,
@@ -222,30 +263,50 @@ router.put("/:id/questions/:questionId", async (req, res) => {
       questions: survey.getQuestions(),
     })
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Unexpected error."
+  const message =
+    error instanceof Error ? error.message : "Unexpected error."
 
-    if (message === "Survey not found.") {
-      res.status(404).json({ message })
-      return
-    }
+  if (message === "Survey not found.") {
+    console.warn("[Survey] Cannot update question: survey not found", {
+      surveyId: req.params.id,
+    })
 
-    res.status(400).json({ message })
+    res.status(404).json({ message })
+    return
   }
+
+  console.error("[Survey] Failed to update question", {
+    surveyId: req.params.id,
+    questionId: req.params.questionId,
+    error,
+  })
+
+  res.status(400).json({ message })
+}
 })
 
 
 router.post("/:id/publish", async (req, res) => {
   try {
+    console.info("[Survey] Publish request received", {
+  surveyId: req.params.id,
+})
     const survey = await surveyRepository.findById(req.params.id)
 
     if (!survey) {
       res.status(404).json({ message: "Survey not found." })
+      console.warn("[Survey] Cannot publish: survey not found", {
+  surveyId: req.params.id,
+})
       return
     }
 
     survey.publish()
     await surveyRepository.save(survey)
+    console.info("[Survey] Published successfully", {
+  surveyId: survey.id,
+  status: survey.status,
+})
 
     res.status(200).json({
       id: survey.id,
@@ -254,25 +315,39 @@ router.post("/:id/publish", async (req, res) => {
       questions: survey.getQuestions(),
     })
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Unexpected error."
+  const message =
+    error instanceof Error ? error.message : "Unexpected error."
 
-    res.status(400).json({ message })
-  }
+  console.error("[Survey] Failed to publish survey", {
+    surveyId: req.params.id,
+    error,
+  })
+
+  res.status(400).json({ message })
+}
 })
 
 router.post("/:id/close", async (req, res) => {
   try {
+    console.info("[Survey] Close request received", {
+  surveyId: req.params.id,
+})
     const survey = await surveyRepository.findById(req.params.id)
 
     if (!survey) {
       res.status(404).json({ message: "Survey not found." })
+      console.warn("[Survey] Cannot close: survey not found", {
+  surveyId: req.params.id,
+})
       return
     }
 
     survey.close()
     await surveyRepository.save(survey)
-
+    console.info("[Survey] Closed successfully", {
+  surveyId: survey.id,
+  status: survey.status,
+})
     res.status(200).json({
       id: survey.id,
       title: survey.title,
@@ -280,18 +355,26 @@ router.post("/:id/close", async (req, res) => {
       questions: survey.getQuestions(),
     })
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Unexpected error."
+  const message =
+    error instanceof Error ? error.message : "Unexpected error."
 
-    res.status(400).json({ message })
-  }
+  console.error("[Survey] Failed to close survey", {
+    surveyId: req.params.id,
+    error,
+  })
+
+  res.status(400).json({ message })
+}
 })
 
 
 router.get("/stats", async (_req, res) => {
   try {
     const stats = await surveyRepository.getStatistics()
-    res.status(200).json(stats)
+
+console.debug("[Survey] Statistics fetched successfully", stats)
+
+res.status(200).json(stats)
   } catch (error) {
     console.error("Failed to fetch survey statistics:", error)
     res.status(500).json({
@@ -302,10 +385,16 @@ router.get("/stats", async (_req, res) => {
 
 router.get("/:id", async (req, res) => {
   try {
+    console.debug("[Survey] Fetching survey", {
+  surveyId: req.params.id,
+})
     const survey = await surveyRepository.findById(req.params.id)
 
     if (!survey) {
       res.status(404).json({ message: "Survey not found." })
+      console.warn("[Survey] Survey not found", {
+  surveyId: req.params.id,
+})
       return
     }
 
@@ -317,18 +406,29 @@ router.get("/:id", async (req, res) => {
       questions: survey.getQuestions(),
     })
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Unexpected error."
+  console.error("[Survey] Failed to fetch survey", {
+    surveyId: req.params.id,
+    error,
+  })
 
-    res.status(500).json({ message })
-  }
+  const message =
+    error instanceof Error ? error.message : "Unexpected error."
+
+  res.status(500).json({ message })
+}
 })
 
 router.delete("/:id/questions/:questionId", async (req, res) => {
+  const { id, questionId } = req.params
   try {
-    const { id, questionId } = req.params
-
+    console.info("[Survey] Delete question request received", {
+  surveyId: id,
+  questionId,
+})
     if (!isValidUuid(id)) {
+      console.warn("[Survey] Invalid survey ID format", {
+  surveyId: id,
+})
       res.status(400).json({
         message: "Invalid survey ID format.",
       })
@@ -336,6 +436,9 @@ router.delete("/:id/questions/:questionId", async (req, res) => {
     }
 
     if (!isValidUuid(questionId)) {
+      console.warn("[Survey] Invalid question ID format", {
+  questionId,
+})
       res.status(400).json({
         message: "Invalid question ID format.",
       })
@@ -343,7 +446,10 @@ router.delete("/:id/questions/:questionId", async (req, res) => {
     }
 
     const survey = await deleteQuestion.execute(id, questionId)
-
+    console.info("[Survey] Question deleted successfully", {
+  surveyId: survey.id,
+  questionId,
+})
     res.status(200).json({
       id: survey.id,
       title: survey.title,
@@ -352,21 +458,36 @@ router.delete("/:id/questions/:questionId", async (req, res) => {
       questions: survey.getQuestions(),
     })
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Unexpected error."
+  const message =
+    error instanceof Error ? error.message : "Unexpected error."
 
-    if (message === "Survey not found.") {
-      res.status(404).json({ message })
-      return
-    }
+  if (message === "Survey not found.") {
+    console.warn("[Survey] Cannot delete question: survey not found", {
+      surveyId: id,
+    })
 
-    if (message === "Question not found.") {
-      res.status(404).json({ message })
-      return
-    }
-
-    res.status(400).json({ message })
+    res.status(404).json({ message })
+    return
   }
+
+  if (message === "Question not found.") {
+    console.warn("[Survey] Cannot delete question: question not found", {
+      surveyId: id,
+      questionId,
+    })
+
+    res.status(404).json({ message })
+    return
+  }
+
+  console.error("[Survey] Failed to delete question", {
+    surveyId: id,
+    questionId,
+    error,
+  })
+
+  res.status(400).json({ message })
+}
 })
 
 
@@ -383,7 +504,6 @@ if (!Array.isArray(answers)) {
       req.params.id,
       answers
     )
-
     res.status(201).json({
       id: response.id,
       surveyId: response.surveyId,

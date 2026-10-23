@@ -16,7 +16,7 @@ describe("MongoSurveyRepository", () => {
   })
 
   it("saves and retrieves a draft survey", async () => {
-    const id = `test-${crypto.randomUUID()}`
+    const id = crypto.randomUUID()
     const survey = new Survey(id, "Employee Onboarding")
 
     await repository.save(survey)
