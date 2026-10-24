@@ -22,6 +22,7 @@ type Question = {
     | "multiple_choice"
     | "rating"
   required: boolean
+  helperText?: string
   options?: Option[]
 }
 
@@ -73,6 +74,7 @@ const [statusFilter, setStatusFilter] = useState("all")
   const [surveyQuestions, setSurveyQuestions] = useState<Question[]>([])
   const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null)
 const [editQuestionLabel, setEditQuestionLabel] = useState("")
+const [editQuestionHelperText, setEditQuestionHelperText] = useState("")
 const [editQuestionRequired, setEditQuestionRequired] = useState(true)
 const [editQuestionOptions, setEditQuestionOptions] = useState<Option[]>([])
 const [savingEdit, setSavingEdit] = useState(false)
@@ -84,6 +86,7 @@ const [questionOptions, setQuestionOptions] = useState<Option[]>([{ id: crypto.r
 const [addingQuestion, setAddingQuestion] = useState(false)
 const [builderError, setBuilderError] = useState("")
 const [searchTerm, setSearchTerm] = useState("")
+const [questionHelperText, setQuestionHelperText] = useState("")
 const [sortBy, setSortBy] = useState<
   "newest" | "name-asc" | "name-desc"
 >("newest")
@@ -270,6 +273,7 @@ body: JSON.stringify({
   label: questionLabel.trim(),
   type: questionType,
   required: questionRequired,
+  helperText: questionHelperText.trim(),
   ...(questionType === "single_choice" ||
   questionType === "multiple_choice"
     ? {
@@ -302,6 +306,7 @@ body: JSON.stringify({
     setSelectedSurvey(updatedSurvey)
     setSurveyQuestions(updatedSurvey.questions)
     setQuestionLabel("")
+    setQuestionHelperText("")
     setQuestionType("short_text")
     setQuestionRequired(true)
     setQuestionOptions([{ id: "", text: "" }, { id: "", text: "" }])
@@ -385,6 +390,7 @@ async function saveQuestionEdit(question: Question) {
   label: editQuestionLabel.trim(),
   type: question.type,
   required: editQuestionRequired,
+  helperText: editQuestionHelperText.trim(),
   ...(question.type === "single_choice" ||
   question.type === "multiple_choice"
     ? { options: editQuestionOptions }
@@ -414,6 +420,7 @@ async function saveQuestionEdit(question: Question) {
     setEditingQuestionId(null)
     setEditQuestionLabel("")
     setEditQuestionOptions([])
+    setEditQuestionHelperText("")
     await refreshSurveys()
   } catch (error) {
     setBuilderError(
@@ -567,7 +574,11 @@ return (
             {index + 1}. {question.label}
             {question.required && " *"}
           </h3>
-
+        {question.helperText && (
+  <p className="survey-description">
+    {question.helperText}
+  </p>
+)}
           {question.type === "short_text" && (
             <input placeholder="Your answer" disabled />
           )}
@@ -703,6 +714,18 @@ return (
       placeholder="Enter your question"
     />
 
+    <label htmlFor="question-helper-text">
+  Helper text (optional)
+</label>
+<textarea
+  id="question-helper-text"
+  maxLength={300}
+  value={questionHelperText}
+  onChange={(event) => setQuestionHelperText(event.target.value)}
+  placeholder="Add guidance to help respondents answer"
+  rows={2}
+/>
+
     <label htmlFor="question-type">Question type</label>
     <select
       id="question-type"
@@ -826,6 +849,20 @@ return (
         setEditQuestionLabel(event.target.value)
       }
     />
+    <label htmlFor={`edit-helper-text-${question.id}`}>
+  Helper text (optional)
+</label>
+
+<textarea
+  id={`edit-helper-text-${question.id}`}
+  maxLength={300}
+  rows={2}
+  value={editQuestionHelperText}
+  onChange={(event) =>
+    setEditQuestionHelperText(event.target.value)
+  }
+  placeholder="Add guidance to help respondents answer"
+/>
 
 {question.type === "single_choice" ||
  question.type === "multiple_choice" ? (
@@ -913,7 +950,12 @@ return (
     </button>
   </div>
 ) : (
-  <h3>{question.label}</h3>
+ <h3>{question.label}</h3>
+)}
+{question.helperText && (
+  <p className="survey-description">
+    {question.helperText}
+  </p>
 )}
 
 
@@ -943,6 +985,7 @@ return (
       setEditingQuestionId(question.id)
       setEditQuestionLabel(question.label)
       setEditQuestionRequired(question.required)
+      setEditQuestionHelperText(question.helperText ?? "")
       setEditQuestionOptions(question.options ? [...question.options] : [])
       setBuilderError("")
     }}

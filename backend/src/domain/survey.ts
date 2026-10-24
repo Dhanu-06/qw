@@ -109,6 +109,15 @@ private validateQuestion(question: Question): void {
   if (question.label.length > 200) {
     throw new Error("Question label cannot exceed 200 characters.")
   }
+  if (question.helperText !== undefined) {
+  if (typeof question.helperText !== "string") {
+    throw new Error("Helper text must be a string.")
+  }
+
+  if (question.helperText.length > 300) {
+    throw new Error("Helper text cannot exceed 300 characters.")
+  }
+}
 
   if (
   question.type === "single_choice" ||
@@ -277,7 +286,7 @@ validateAnswers(answers: Answer[]): void {
           throw new Error("Required question cannot be empty.")
         }
         break
-        
+
       case "rating":
         if (
           typeof value !== "number" ||

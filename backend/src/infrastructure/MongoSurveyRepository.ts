@@ -51,6 +51,7 @@ async findPaginated(
         label: question.label,
         type: question.type,
         required: question.required,
+        helperText: question.helperText,
         options: question.options,
       })),
       document.description ?? ""
@@ -106,6 +107,7 @@ return Survey.rehydrate(
     label: question.label,
     type: question.type,
     required: question.required,
+    helperText: question.helperText,
     options: question.options,
   })),
   document.description ?? ""

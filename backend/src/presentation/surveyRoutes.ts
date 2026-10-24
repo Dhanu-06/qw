@@ -138,7 +138,7 @@ console.debug("[Survey] Fetching survey list", {
 
 router.post("/:id/questions", async (req, res) => {
   try {
-    const { label, type, required, options } = req.body
+    const { label, type, required, helperText, options } = req.body
     console.info("[Survey] Add question request received", {
   surveyId: req.params.id,
   questionType: type,
@@ -170,7 +170,8 @@ router.post("/:id/questions", async (req, res) => {
       label: label.trim(),
       type: type as Question["type"],
       required,
-      options,
+      ...(helperText !== undefined ? { helperText } : {}),
+  options,
     }
 
     const survey = await addQuestion.execute(
@@ -212,7 +213,7 @@ router.post("/:id/questions", async (req, res) => {
 
 router.put("/:id/questions/:questionId", async (req, res) => {
   try {
-    const { label, type, required, options } = req.body
+    const { label, type, required, helperText, options } = req.body
     console.info("[Survey] Update question request received", {
   surveyId: req.params.id,
   questionId: req.params.questionId,
@@ -244,7 +245,8 @@ router.put("/:id/questions/:questionId", async (req, res) => {
       label,
       type: type as Question["type"],
       required,
-      options,
+      ...(helperText !== undefined ? { helperText } : {}),
+  options,
     }
 
     const survey = await updateQuestion.execute(

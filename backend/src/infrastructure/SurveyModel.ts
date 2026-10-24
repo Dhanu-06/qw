@@ -6,8 +6,9 @@ import type { SurveyStatus } from "../domain/survey"
 const questionSchema = new Schema<Question>(
   {
     id: { type: String, required: true },
-    label: { type: String, required: true },
-    type: {
+label: { type: String, required: true },
+helperText: { type: String, default: undefined },
+type: {
       type: String,
       enum: [
         "short_text",

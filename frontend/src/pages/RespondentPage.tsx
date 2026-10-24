@@ -170,6 +170,12 @@ setValidationErrors({})
         {index + 1}. {question.label}
         {question.required && " *"}
       </h3>
+      {question.helperText && (
+
+  <p className="survey-description">
+    {question.helperText}
+  </p>
+)}
 
 {question.type === "short_text" && (
   <input

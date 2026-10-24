@@ -13,5 +13,6 @@ export interface Question {
   label: string
   type: QuestionType
   required: boolean
+  helperText?: string
   options?: Option[]
 }
