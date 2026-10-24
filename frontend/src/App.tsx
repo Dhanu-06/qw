@@ -7,6 +7,10 @@ import RespondentPage from './pages/RespondentPage'
 import ResultsPage from './pages/ResultsPage'
 import { useQuery, useQueryClient, } from "@tanstack/react-query"
 
+type Option = {
+id: string
+text: string
+}
 
 type Question = {
   id: string
@@ -18,7 +22,7 @@ type Question = {
     | "multiple_choice"
     | "rating"
   required: boolean
-  options?: string[]
+  options?: Option[]
 }
 
 export type Survey = {
@@ -70,13 +74,13 @@ const [statusFilter, setStatusFilter] = useState("all")
   const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null)
 const [editQuestionLabel, setEditQuestionLabel] = useState("")
 const [editQuestionRequired, setEditQuestionRequired] = useState(true)
-const [editQuestionOptions, setEditQuestionOptions] = useState<string[]>([])
+const [editQuestionOptions, setEditQuestionOptions] = useState<Option[]>([])
 const [savingEdit, setSavingEdit] = useState(false)
   const [questionLabel, setQuestionLabel] = useState("")
 const [questionType, setQuestionType] =
   useState<Question["type"]>("short_text")
 const [questionRequired, setQuestionRequired] = useState(true)
-const [questionOptions, setQuestionOptions] = useState<string[]>(["", ""])
+const [questionOptions, setQuestionOptions] = useState<Option[]>([{ id: crypto.randomUUID(), text: "" }, { id: crypto.randomUUID(), text: "" }])
 const [addingQuestion, setAddingQuestion] = useState(false)
 const [builderError, setBuilderError] = useState("")
 const [searchTerm, setSearchTerm] = useState("")
@@ -270,8 +274,8 @@ body: JSON.stringify({
   questionType === "multiple_choice"
     ? {
         options: questionOptions
-          .map((option) => option.trim())
-          .filter((option) => option !== ""),
+          .map((option) => ({ id: option.id, text: option.text.trim() }))
+          .filter((option) => option.text !== ""),
       }
     : {}),
 }),
@@ -300,7 +304,7 @@ body: JSON.stringify({
     setQuestionLabel("")
     setQuestionType("short_text")
     setQuestionRequired(true)
-    setQuestionOptions(["", ""])
+    setQuestionOptions([{ id: "", text: "" }, { id: "", text: "" }])
 
     await refreshSurveys()
   } catch (error) {
@@ -575,9 +579,9 @@ return (
           {question.type === "single_choice" && (
             <div>
               {question.options?.map((option) => (
-                <label key={option}>
+                <label key={option.id}>
                   <input type="radio" disabled />
-                  {option}
+                  {option.text}
                 </label>
               ))}
             </div>
@@ -586,9 +590,9 @@ return (
           {question.type === "multiple_choice" && (
             <div>
               {question.options?.map((option) => (
-                <label key={option}>
+                <label key={option.id}>
                   <input type="checkbox" disabled />
-                  {option}
+                  {option.text}
                 </label>
               ))}
             </div>
@@ -720,39 +724,48 @@ return (
     <label>Answer options</label>
 
     {questionOptions.map((option, index) => (
-      <div key={index}>
-        <input
-        maxLength={100}
-          value={option}
-          placeholder={`Option ${index + 1}`}
-          onChange={(event) => {
-            const updatedOptions = [...questionOptions]
-            updatedOptions[index] = event.target.value
-            setQuestionOptions(updatedOptions)
-          }}
-        />
+  <div key={option.id || index}>
+    <input
+      maxLength={100}
+      value={option.text}
+      placeholder={`Option ${index + 1}`}
+      onChange={(event) => {
+        const updatedOptions = [...questionOptions]
 
-        {questionOptions.length > 2 && (
-          <button
-            type="button"
-            className="secondary-button"
-            onClick={() => {
-              setQuestionOptions(
-                questionOptions.filter((_, i) => i !== index)
-              )
-            }}
-          >
-            Remove
-          </button>
-        )}
-      </div>
-    ))}
+        updatedOptions[index] = {
+          ...updatedOptions[index],
+          text: event.target.value,
+        }
 
+        setQuestionOptions(updatedOptions)
+      }}
+    />
+
+    {questionOptions.length > 2 && (
+      <button
+        type="button"
+        className="secondary-button"
+        onClick={() => {
+          setQuestionOptions(
+            questionOptions.filter((_, i) => i !== index)
+          )
+        }}
+      >
+        Remove
+      </button>
+    )}
+  </div>
+))}
     <button
       type="button"
       className="secondary-button"
-      onClick={() => setQuestionOptions([...questionOptions, ""])}
-    >
+     onClick={() =>
+  setQuestionOptions([
+    ...questionOptions,
+    { id: crypto.randomUUID(), text: "" },
+  ])
+}
+>
       + Add option
     </button>
   </div>
@@ -823,11 +836,15 @@ return (
       <div key={index}>
         <input
           maxLength={100}
-          value={option}
+          value={option.text}
           placeholder={`Option ${index + 1}`}
           onChange={(event) => {
             const updatedOptions = [...editQuestionOptions]
-            updatedOptions[index] = event.target.value
+            updatedOptions[index] = {
+      ...updatedOptions[index],
+      text: event.target.value,
+    }
+
             setEditQuestionOptions(updatedOptions)
           }}
         />
@@ -850,7 +867,12 @@ return (
     <button
       type="button"
       className="secondary-button"
-      onClick={() => setEditQuestionOptions([...editQuestionOptions, ""])}
+      onClick={() =>
+  setEditQuestionOptions([
+    ...editQuestionOptions,
+    { id: crypto.randomUUID(), text: "" },
+  ])
+}
       disabled={editQuestionOptions.length >= 20}
     >
       Add option
@@ -908,7 +930,7 @@ return (
     {question.options && question.options.length > 0 && (
       <ul>
         {question.options.map((option) => (
-          <li key={option}>{option}</li>
+          <li key={option.id}>{option.text}</li>
         ))}
       </ul>
     )}

@@ -19,7 +19,16 @@ const questionSchema = new Schema<Question>(
       required: true,
     },
     required: { type: Boolean, required: true },
-    options: { type: [String], default: undefined },
+    options: {
+  type: [
+    {
+      _id: false,
+      id: { type: String, required: true },
+      text: { type: String, required: true },
+    },
+  ],
+  default: undefined,
+},
   },
   { _id: false }
 )

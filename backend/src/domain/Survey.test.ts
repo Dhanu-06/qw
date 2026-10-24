@@ -37,7 +37,10 @@ describe("Survey", () => {
       label: "How was your onboarding?",
       type: "single_choice",
       required: true,
-      options: ["Good", "Bad"],
+      options: [
+  { id: "q1-opt1", text: "Good" },
+  { id: "q1-opt2", text: "Bad" },
+],
     }
 
     survey.addQuestion(originalQuestion)
@@ -47,7 +50,9 @@ describe("Survey", () => {
       label: "How was your onboarding?",
       type: "single_choice",
       required: true,
-      options: ["Good"],
+      options: [
+  { id: "q1-opt1", text: "Good" },
+],
     }
 
     expect(() => survey.updateQuestion("q1", invalidQuestion)).toThrow(
@@ -91,7 +96,9 @@ describe("Survey", () => {
       label: "How clear are your responsibilities?",
       type: "single_choice",
       required: true,
-      options: ["Very clear"],
+      options: [
+  { id: "q1-opt1", text: "Very clear" },
+],
     }
 
     expect(() => survey.addQuestion(invalidQuestion)).toThrow(
@@ -251,20 +258,26 @@ describe("Survey", () => {
       label: "How clear are your responsibilities?",
       type: "single_choice",
       required: true,
-      options: ["Very clear", "Not clear"],
+      options: [
+        { id: "q1-opt1", text: "Very clear" },
+        { id: "q1-opt2", text: "Not clear" },
+      ],
     })
 
     const questions = survey.getQuestions()
 
     questions[0].label = ""
-    questions[0].options?.push("Maybe")
+    questions[0].options?.push({ id: "q1-opt3", text: "Maybe" })
 
     const savedQuestion = survey.getQuestions()[0]
 
     expect(savedQuestion.label).toBe(
       "How clear are your responsibilities?"
     )
-    expect(savedQuestion.options).toEqual(["Very clear", "Not clear"])
+    expect(savedQuestion.options).toEqual([
+      { id: "q1-opt1", text: "Very clear" },
+      { id: "q1-opt2", text: "Not clear" },
+    ])
   })
 
     it("should reject an unsupported question type", () => {
@@ -464,7 +477,10 @@ it("rejects an invalid single-choice option", () => {
         label: "How was your onboarding?",
         type: "single_choice",
         required: true,
-        options: ["Good", "Bad"],
+        options: [
+  { id: "q1-opt1", text: "Good" },
+  { id: "q1-opt2", text: "Bad" },
+],
       },
     ]
   )
@@ -487,7 +503,11 @@ it("rejects an invalid multiple-choice option", () => {
         label: "What support do you need?",
         type: "multiple_choice",
         required: true,
-        options: ["Training", "Mentoring", "Resources"],
+        options: [
+          { id: "q1-opt1", text: "Training" },
+          { id: "q1-opt2", text: "Mentoring" },
+          { id: "q1-opt3", text: "Resources" }
+        ],
       },
     ]
   )
@@ -513,7 +533,11 @@ it("rejects duplicate multiple-choice selections", () => {
         label: "What support do you need?",
         type: "multiple_choice",
         required: true,
-        options: ["Training", "Mentoring", "Resources"],
+        options: [
+          { id: "q1-opt1", text: "Training" },
+          { id: "q1-opt2", text: "Mentoring" },
+          { id: "q1-opt3", text: "Resources" }
+        ],
       },
     ]
   )
@@ -539,7 +563,11 @@ it("rejects an empty selection for a required multiple-choice question", () => {
         label: "What support do you need?",
         type: "multiple_choice",
         required: true,
-        options: ["Training", "Mentoring", "Resources"],
+        options: [
+          { id: "q1-opt1", text: "Training" },
+          { id: "q1-opt2", text: "Mentoring" },
+          { id: "q1-opt3", text: "Resources" }
+        ],
       },
     ]
   )
@@ -701,7 +729,11 @@ it("accepts valid multiple-choice selections", () => {
         label: "What support do you need?",
         type: "multiple_choice",
         required: true,
-        options: ["Training", "Mentoring", "Resources"],
+        options: [
+          { id: "q1-opt1", text: "Training" },
+          { id: "q1-opt2", text: "Mentoring" },
+          { id: "q1-opt3", text: "Resources" }
+        ],
       },
     ]
   )
@@ -710,7 +742,7 @@ it("accepts valid multiple-choice selections", () => {
     survey.validateAnswers([
       {
         questionId: "q1",
-        value: ["Training", "Mentoring"],
+        value: ["q1-opt1", "q1-opt2"],
       },
     ])
   ).not.toThrow()
@@ -752,7 +784,10 @@ it("accepts an option of exactly 100 characters", () => {
       label: "Choose an option",
       type: "single_choice",
       required: true,
-      options: ["A".repeat(100), "Other"],
+      options: [
+        { id: "q1-opt1", text: "A".repeat(100) },
+        { id: "q1-opt2", text: "Other" }
+      ],
     })
   ).not.toThrow()
 })
@@ -766,7 +801,10 @@ it("rejects an option longer than 100 characters", () => {
       label: "Choose an option",
       type: "single_choice",
       required: true,
-      options: ["A".repeat(101), "Other"],
+      options: [
+        { id: "q1-opt1", text: "A".repeat(101) },
+        { id: "q1-opt2", text: "Other" }
+      ],
     })
   ).toThrow("Each option cannot exceed 100 characters.")
 })
@@ -892,21 +930,30 @@ it("should reject updating a choice option longer than 100 characters", () => {
     label: "Choose an option",
     type: "single_choice",
     required: true,
-    options: ["Option A", "Option B"],
+    options: [
+      { id: "q1-opt1", text: "Option A" },
+      { id: "q1-opt2", text: "Option B" }
+    ],
   }
 
   survey.addQuestion(question)
 
   const updatedQuestion: Question = {
     ...question,
-    options: ["A".repeat(101), "Option B"],
+    options: [
+      { id: "q1-opt1", text: "A".repeat(101) },
+      { id: "q1-opt2", text: "Option B" }
+    ],
   }
 
   expect(() => survey.updateQuestion("q1", updatedQuestion)).toThrow(
     "Each option cannot exceed 100 characters."
   )
 
-  expect(survey.getQuestions()[0].options).toEqual(["Option A", "Option B"])
+  expect(survey.getQuestions()[0].options).toEqual([
+    { id: "q1-opt1", text: "Option A" },
+    { id: "q1-opt2", text: "Option B" }
+  ])
 })
 
 })

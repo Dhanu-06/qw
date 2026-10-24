@@ -28,7 +28,13 @@ console.log("Connected to MongoDB. Ready to seed demo data.")
       label: "How was your onboarding experience?",
       type: "single_choice" as const,
       required: true,
-      options: ["Excellent", "Good", "Average", "Poor"],
+options: [
+  { id: "seed-onboarding-q1-opt1", text: "Excellent" },
+  { id: "seed-onboarding-q1-opt2", text: "Good" },
+  { id: "seed-onboarding-q1-opt3", text: "Average" },
+  { id: "seed-onboarding-q1-opt4", text: "Poor" },
+],
+
     },
     {
       id: "seed-onboarding-q2",

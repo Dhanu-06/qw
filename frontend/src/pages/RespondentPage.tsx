@@ -204,48 +204,45 @@ setValidationErrors({})
  
 
 
-{question.type === "single_choice" && (
-  <div>
-    {question.options?.map((option) => (
-      <label key={option}>
-        <input
-          type="radio"
-          name={question.id}
-          checked={answers[question.id] === option}
-          onChange={() =>
-            setAnswers({ ...answers, [question.id]: option })
-          }
-        />
-        {option}
-      </label>
-    ))}
-  </div>
-)}
+{question.options?.map((option) => (
+  <label key={option.id}>
+    <input
+      type="radio"
+      checked={answers[question.id] === option.id}
+      onChange={() =>
+        setAnswers({
+          ...answers,
+          [question.id]: option.id,
+        })
+      }
+    />
+    {option.text}
+  </label>
+))}
 
-{question.type === "multiple_choice" && (
-  <div>
-    {question.options?.map((option) => {
-      const selected = (answers[question.id] as string[]) ?? []
+{question.options?.map((option) => {
+  const selected = (answers[question.id] as string[]) ?? []
 
-      return (
-        <label key={option}>
-          <input
-            type="checkbox"
-            checked={selected.includes(option)}
-            onChange={(event) => {
-              const updated = event.target.checked
-                ? [...selected, option]
-                : selected.filter((item) => item !== option)
+  return (
+    <label key={option.id}>
+      <input
+        type="checkbox"
+        checked={selected.includes(option.id)}
+        onChange={() => {
+          const updated = selected.includes(option.id)
+            ? selected.filter((item) => item !== option.id)
+            : [...selected, option.id]
 
-              setAnswers({ ...answers, [question.id]: updated })
-            }}
-          />
-          {option}
-        </label>
-      )
-    })}
-  </div>
-)}
+          setAnswers({
+            ...answers,
+            [question.id]: updated,
+          })
+        }}
+      />
+      {option.text}
+    </label>
+  )
+})}
 
 {question.type === "rating" && (
   <div>

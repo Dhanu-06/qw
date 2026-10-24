@@ -51,21 +51,22 @@ export class GetSurveyResults {
         question.type === "multiple_choice"
       ) {
         const optionCounts = (question.options ?? []).map((option) => {
-          
-const count = values.reduce<number>((total, value) => {
-  if (typeof value === "string" && value === option) {
-    return total + 1
-  }
+          const count = values.reduce<number>((total, value) => {
+            if (typeof value === "string" && value === option.id) {
+              return total + 1
+            }
 
-  if (Array.isArray(value) && value.includes(option)) {
-    return total + 1
-  }
+            if (Array.isArray(value) && value.includes(option.id)) {
+              return total + 1
+            }
 
-  return total
-}, 0)
+            return total
+          }, 0)
 
-
-          return { option, count }
+          return {
+            option: option.text,
+            count,
+          }
         })
 
         return {
@@ -80,9 +81,7 @@ const count = values.reduce<number>((total, value) => {
         questionId: question.id,
         label: question.label,
         type: question.type,
-        textAnswers: values.filter(
-          (value): value is string => typeof value === "string"
-        ),
+        responseCount: values.length,
       }
     })
 

@@ -111,41 +111,61 @@ private validateQuestion(question: Question): void {
   }
 
   if (
-    question.type === "single_choice" ||
-    question.type === "multiple_choice"
+  question.type === "single_choice" ||
+  question.type === "multiple_choice"
+) {
+  const options = question.options ?? []
+
+  if (!Array.isArray(options)) {
+    throw new Error("Options must be an array.")
+  }
+
+  if (
+    options.some(
+      (option) =>
+        !option ||
+        typeof option.id !== "string" ||
+        typeof option.text !== "string",
+    )
   ) {
-    const options = question.options ?? []
-
-    if (!Array.isArray(options)) {
-      throw new Error("Options must be an array.")
-    }
-
-    if (options.some((option) => typeof option !== "string")) {
-      throw new Error("Every option must be a string.")
-    }
-
-    const cleanedOptions = options.map((option) => option.trim())
-
-    if (cleanedOptions.length < 2) {
-      throw new Error("Choice questions need at least 2 options.")
-    }
-
-    if (cleanedOptions.some((option) => !option)) {
-      throw new Error("Options cannot be empty.")
-    }
-
-    if (cleanedOptions.some((option) => option.length > 100)) {
-      throw new Error("Each option cannot exceed 100 characters.")
-    }
-
-    if (new Set(cleanedOptions).size !== cleanedOptions.length) {
-      throw new Error("Choice options must be distinct.")
-    }
+    throw new Error("Every option must have an ID and text.")
   }
 
-  if (question.type === "rating" && question.options !== undefined) {
-    throw new Error("Rating questions do not use options.")
+  const cleanedOptions = options.map((option) => ({
+    id: option.id.trim(),
+    text: option.text.trim(),
+  }))
+
+  if (cleanedOptions.length < 2) {
+    throw new Error("Choice questions need at least 2 options.")
   }
+
+  if (cleanedOptions.some((option) => !option.id || !option.text)) {
+    throw new Error("Option IDs and text cannot be empty.")
+  }
+
+  if (cleanedOptions.some((option) => option.text.length > 100)) {
+    throw new Error("Each option cannot exceed 100 characters.")
+  }
+
+  if (
+    new Set(cleanedOptions.map((option) => option.id)).size !==
+    cleanedOptions.length
+  ) {
+    throw new Error("Option IDs must be distinct.")
+  }
+
+  if (
+    new Set(cleanedOptions.map((option) => option.text)).size !==
+    cleanedOptions.length
+  ) {
+    throw new Error("Choice options must be distinct.")
+  }
+}
+
+if (question.type === "rating" && question.options !== undefined) {
+  throw new Error("Rating questions do not use options.")
+}
 }
 
 
@@ -231,10 +251,10 @@ validateAnswers(answers: Answer[]): void {
   }
         break
 
-      case "single_choice":
+            case "single_choice":
         if (
           typeof value !== "string" ||
-          !question.options?.includes(value)
+          !question.options?.some((option) => option.id === value)
         ) {
           throw new Error("Invalid single-choice answer.")
         }
@@ -246,17 +266,18 @@ validateAnswers(answers: Answer[]): void {
           !value.every(
             (item) =>
               typeof item === "string" &&
-              question.options?.includes(item)
+              question.options?.some((option) => option.id === item),
           ) ||
           new Set(value).size !== value.length
         ) {
           throw new Error("Invalid multiple-choice answer.")
         }
+
         if (question.required && value.length === 0) {
           throw new Error("Required question cannot be empty.")
         }
         break
-
+        
       case "rating":
         if (
           typeof value !== "number" ||
