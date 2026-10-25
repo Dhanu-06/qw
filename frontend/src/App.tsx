@@ -62,7 +62,7 @@ const [surveyDescription, setSurveyDescription] = useState("")
 
 const [currentPage, setCurrentPage] = useState(1)
 const [totalPages, setTotalPages] = useState(1)
-
+const [pageSize, setPageSize] = useState(5)
 const [statusFilter, setStatusFilter] = useState("all")
 
 
@@ -111,7 +111,7 @@ const {
   async function refreshSurveys() {
   const query = new URLSearchParams({
     page: String(currentPage),
-    limit: "5",
+    limit: String(pageSize),
   })
 
   if (statusFilter !== "all") {
@@ -146,6 +146,7 @@ const {
   async function loadSurveys() {
     try {
       setSurveyError("")
+      setLoadingSurveys(true)
       await refreshSurveys()
     } catch (error) {
       setSurveyError(
@@ -159,7 +160,7 @@ const {
   }
 
   loadSurveys()
-}, [currentPage, statusFilter, searchTerm, sortBy])
+}, [currentPage, pageSize, statusFilter, searchTerm, sortBy])
 
   async function handleCreateSurvey() {
     if (!surveyTitle.trim()) {
@@ -1218,6 +1219,24 @@ return (
       <option value="name-desc">Name: Z–A</option>
     </select>
   </div>
+  <div>
+  <label htmlFor="page-size">
+    Items per page:
+  </label>
+
+  <select
+    id="page-size"
+    value={pageSize}
+    onChange={(event) => {
+      setPageSize(Number(event.target.value))
+      setCurrentPage(1)
+    }}
+  >
+    <option value={5}>5</option>
+    <option value={25}>25</option>
+    <option value={100}>100</option>
+  </select>
+</div>
 </div>
 
                 <div className="survey-list">

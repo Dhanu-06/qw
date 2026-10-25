@@ -956,4 +956,88 @@ it("should reject updating a choice option longer than 100 characters", () => {
   ])
 })
 
+it("rehydrates every supported question type with valid choice option IDs", () => {
+  const survey = Survey.rehydrate(
+    "survey-all-types",
+    "All question types",
+    "draft",
+    [
+      {
+        id: "q-short",
+        label: "Role",
+        type: "short_text",
+        required: true,
+      },
+      {
+        id: "q-long",
+        label: "Comments",
+        type: "long_text",
+        required: false,
+        helperText: "Optional",
+      },
+      {
+        id: "q-single",
+        label: "Recommend?",
+        type: "single_choice",
+        required: true,
+        options: [
+          { id: "opt-yes", text: "yes" },
+          { id: "opt-no", text: "no" },
+        ],
+      },
+      {
+        id: "q-multi",
+        label: "Languages",
+        type: "multiple_choice",
+        required: true,
+        options: [
+          { id: "opt-c", text: "c" },
+          { id: "opt-cpp", text: "cpp" },
+        ],
+      },
+      {
+        id: "q-rating",
+        label: "Score",
+        type: "rating",
+        required: true,
+      },
+    ]
+  )
+
+  const questions = survey.getQuestions()
+  expect(questions).toHaveLength(5)
+  expect(questions[2].options).toEqual([
+    { id: "opt-yes", text: "yes" },
+    { id: "opt-no", text: "no" },
+  ])
+})
+
+it("rejects choice options that are still stored as plain strings", () => {
+  expect(() =>
+    Survey.rehydrate("survey-legacy-strings", "Legacy", "draft", [
+      {
+        id: "q1",
+        label: "Recommend?",
+        type: "single_choice",
+        required: true,
+        options: ["yes", "no"] as unknown as Question["options"],
+      },
+    ])
+  ).toThrow("Every option must have an ID and text.")
+})
+
+it("rejects choice options that are missing IDs or text", () => {
+  expect(() =>
+    Survey.rehydrate("survey-missing-option-id", "Invalid", "draft", [
+      {
+        id: "q1",
+        label: "Recommend?",
+        type: "single_choice",
+        required: true,
+        options: [{ text: "yes" }, { text: "no" }] as unknown as Question["options"],
+      },
+    ])
+  ).toThrow("Every option must have an ID and text.")
+})
+
 })

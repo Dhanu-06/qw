@@ -21,15 +21,9 @@ type: {
     },
     required: { type: Boolean, required: true },
     options: {
-  type: [
-    {
-      _id: false,
-      id: { type: String, required: true },
-      text: { type: String, required: true },
+      type: [Schema.Types.Mixed],
+      default: undefined,
     },
-  ],
-  default: undefined,
-},
   },
   { _id: false }
 )

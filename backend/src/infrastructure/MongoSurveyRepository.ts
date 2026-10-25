@@ -1,7 +1,36 @@
 
 import { Survey } from "../domain/survey"
 import type { SurveyRepository } from "../application/SurveyRepository"
+import type { Question } from "../domain/question"
 import { SurveyModel } from "./SurveyModel"
+import { mapPersistedQuestion } from "./mapPersistedQuestions"
+
+type PersistedQuestion = {
+  id: string
+  label: string
+  type: Question["type"]
+  required: boolean
+  helperText?: string
+  options?: unknown
+}
+
+type PersistedSurveyDocument = {
+  _id: { toString(): string }
+  title: string
+  status: Survey["status"]
+  description?: string
+  questions: PersistedQuestion[]
+}
+
+function toDomainSurvey(document: PersistedSurveyDocument): Survey {
+  return Survey.rehydrate(
+    document._id.toString(),
+    document.title,
+    document.status,
+    document.questions.map(mapPersistedQuestion),
+    document.description ?? ""
+  )
+}
 
 export class MongoSurveyRepository implements SurveyRepository {
 
@@ -42,20 +71,7 @@ async findPaginated(
   ])
 
   const surveys = documents.map((document) =>
-    Survey.rehydrate(
-      document._id.toString(),
-      document.title,
-      document.status,
-      document.questions.map((question) => ({
-        id: question.id,
-        label: question.label,
-        type: question.type,
-        required: question.required,
-        helperText: question.helperText,
-        options: question.options,
-      })),
-      document.description ?? ""
-    )
+    toDomainSurvey(document as PersistedSurveyDocument)
   )
 
   return { documents: surveys, total }
@@ -98,20 +114,7 @@ async findById(id: string): Promise<Survey | null> {
   }
 
   
-return Survey.rehydrate(
-  document._id.toString(),
-  document.title,
-  document.status,
-  document.questions.map((question) => ({
-    id: question.id,
-    label: question.label,
-    type: question.type,
-    required: question.required,
-    helperText: question.helperText,
-    options: question.options,
-  })),
-  document.description ?? ""
-)
+  return toDomainSurvey(document as PersistedSurveyDocument)
 
 }
 

@@ -10,6 +10,7 @@ import { SubmitSurveyResponse } from "../application/SubmitSurveyResponse"
 import { MongoSurveyResponseRepository } from "../infrastructure/MongoSurveyResponseRepository"
 import { GetSurveyResults } from "../application/GetSurveyResults"
 import { isValidUuid } from "./validateUuid"
+import { parseSurveyListPagination } from "./parseSurveyListPagination"
 
 const router = Router()
 const surveyRepository = new MongoSurveyRepository()
@@ -70,11 +71,7 @@ console.info("[Survey] Created successfully", {
 
 router.get("/", async (req, res) => {
   try {
-    const page = Math.max(1, Number(req.query.page) || 1)
-    const limit = Math.min(
-      10,
-      Math.max(1, Number(req.query.limit) || 5)
-    )
+    const { page, limit } = parseSurveyListPagination(req.query)
 
     const status =
       typeof req.query.status === "string" &&
@@ -171,7 +168,7 @@ router.post("/:id/questions", async (req, res) => {
       type: type as Question["type"],
       required,
       ...(helperText !== undefined ? { helperText } : {}),
-  options,
+      options,
     }
 
     const survey = await addQuestion.execute(
@@ -246,7 +243,7 @@ router.put("/:id/questions/:questionId", async (req, res) => {
       type: type as Question["type"],
       required,
       ...(helperText !== undefined ? { helperText } : {}),
-  options,
+      options,
     }
 
     const survey = await updateQuestion.execute(

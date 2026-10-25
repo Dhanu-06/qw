@@ -1158,3 +1158,14 @@ hr {
     padding: 0 12px;
   }
 }
+#page-size {
+  display: inline-block;
+  visibility: visible;
+  opacity: 1;
+  width: auto;
+  min-width: 70px;
+  height: 35px;
+  color: black;
+  background-color: white;
+  border: 1px solid #ccc;
+}

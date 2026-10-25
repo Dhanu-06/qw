@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { cleanup, render, screen, waitFor } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import App from './App'
@@ -95,5 +95,61 @@ describe('Survey dashboard statistics', () => {
     await waitFor(() => {
   expect(screen.getAllByText('Network error').length).toBeGreaterThan(0)
 })
+  })
+})
+
+describe('Survey dashboard pagination', () => {
+  it('requests the selected page size and resets to page 1', async () => {
+    const fetchMock = vi.fn().mockImplementation(async (url: string) => {
+      if (String(url).endsWith('/stats')) {
+        return {
+          ok: true,
+          json: async () => ({
+            total: 1,
+            drafts: 1,
+            published: 0,
+          }),
+        }
+      }
+
+      return {
+        ok: true,
+        json: async () => ({
+          surveys: [
+            {
+              id: 'survey-1',
+              title: 'Onboarding',
+              description: '',
+              status: 'draft',
+              questions: [],
+            },
+          ],
+          page: 1,
+          totalPages: 1,
+        }),
+      }
+    })
+
+    vi.stubGlobal('fetch', fetchMock)
+
+    renderApp()
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('Items per page:')).toBeInTheDocument()
+    })
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.stringContaining('page=1&limit=5'),
+    )
+
+    fireEvent.change(screen.getByLabelText('Items per page:'), {
+      target: { value: '25' },
+    })
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.stringContaining('page=1&limit=25'),
+      )
+    })
   })
 })
