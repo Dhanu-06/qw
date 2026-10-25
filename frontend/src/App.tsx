@@ -310,7 +310,7 @@ body: JSON.stringify({
     setQuestionHelperText("")
     setQuestionType("short_text")
     setQuestionRequired(true)
-    setQuestionOptions([{ id: "", text: "" }, { id: "", text: "" }])
+    setQuestionOptions([{ id: crypto.randomUUID(), text: "" }, { id: "", text: "" }])
 
     await refreshSurveys()
   } catch (error) {
