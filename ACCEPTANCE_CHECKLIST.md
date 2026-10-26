@@ -355,6 +355,10 @@ Screenshots are stored in the repository's \`evidence/\` folder. The relative li
 
 
 
+Before submitting, confirm that the files exist in \`evidence/\` with these exact names and that each screenshot visibly supports the checks linked to it. A screenshot of the UI alone does not prove every API edge case in a range; retain separate evidence for additional cases if needed.
+
+
+
 **## Final summary**
 
 
