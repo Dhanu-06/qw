@@ -34,7 +34,7 @@ The user reported creating a draft with all five question types, reloading and s
 
  ID | Steps | Expected result | Actual result / evidence | Status |
 
----|---|---|---|---|
+| --- | --- | --- | --- | --- |
 
  1.1 | Create a draft with a title and description. Add short text, long text, single choice, multiple choice, and rating questions. | The draft is created and all five question types can be added. | Created a draft survey and added all five question types; they remained visible after reload. | Pass |
 
@@ -56,8 +56,7 @@ Goal: Confirm only valid surveys can be published and drafts cannot receive resp
 
  ID | Steps | Expected result | Actual result / evidence | Status |
 
----|---|---|---|---|
-
+| --- | --- | --- | --- | --- |
  2.1 | Attempt to publish a survey with a blank title. | Publication is rejected with a useful validation message. | Verified: invalid publication is rejected. | Pass |
 
  2.2 | Attempt to publish a survey with no questions. | Publication is rejected with a useful validation message. | Verified: empty-survey publication was blocked. | Pass |
@@ -76,7 +75,7 @@ Goal: Confirm question definitions cannot be changed after publication and inval
 
  ID | Steps | Expected result | Actual result / evidence | Status |
 
----|---|---|---|---|
+| --- | --- | --- | --- | --- |
 
  3.1 | In the UI, try to edit a published question. | Published question definitions remain unchanged; editing is unavailable or rejected. | Verified in the UI: published surveys have no edit option. | Pass |
 
@@ -96,7 +95,7 @@ Goal: Confirm valid responses are accepted, optional questions may be skipped, a
 
  ID | Steps | Expected result | Actual result / evidence | Status |
 
----|---|---|---|---|
+| --- | --- | --- | --- | --- |
 
  4.1 | Start local dependencies using docker compose up -d from the repository root. | Docker Compose starts the configured dependencies successfully. | Verified: the configured local dependency setup works. | Pass |
 
@@ -118,7 +117,7 @@ For each case, record the HTTP status or error response and verify that the save
 
  ID | Direct API test | Expected result | Actual result / evidence | Status |
 
----|---|---|---|---|
+| --- | --- | --- | --- | --- |
 
  5.1 | Submit a blank or missing required answer. | Request is rejected; no response is saved. | Verified in the UI and with Postman: a missing required answer is rejected and invalid submissions are not saved. | Pass |
 
@@ -144,7 +143,7 @@ Goal: Confirm closing a survey prevents new submissions without removing existin
 
  ID | Steps | Expected result | Actual result / evidence | Status |
 
----|---|---|---|---|
+-| --- | --- | --- | --- | --- |
 
  6.1 | Open the respondent form for a Published survey in one browser tab. | The respondent form is available. | Verified: the respondent form can be opened for a Published survey. | Pass |
 
@@ -162,7 +161,7 @@ Goal: Confirm pagination is server-side for the survey dashboard and each survey
 
  ID | Steps | Expected result | Actual result / evidence | Status |
 
----|---|---|---|---|
+-| --- | --- | --- | --- | --- |
 
  7.1 | Use seeded data and navigate through multiple survey dashboard pages. Inspect network requests or API responses. | The frontend requests pages from the server rather than fetching all records and slicing them only in the browser. | Verified: survey dashboard pagination is handled by the server. | Pass |
 
@@ -191,7 +190,7 @@ Goal: Confirm summary calculations use all saved responses, not only the current
 
  ID | Steps | Expected result | Actual result / evidence | Status |
 
----|---|---|---|---|
+| --- | --- | --- | --- | --- |
 
  8.1 | Open results for a survey with responses. | The total response count matches the saved responses. | Verified: the total response count matches saved responses. | Pass |
 
@@ -211,7 +210,7 @@ Goal: Confirm the respondent form communicates requirements and submission outco
 
  ID | Steps | Expected result | Actual result / evidence | Status |
 
----|---|---|---|---|
+| --- | --- | --- | --- | --- |
 
  9.1 | Open a Published survey's respondent route. | The form displays the correct survey and question labels. | Verified: the respondent route displays the correct survey and question labels. | Pass |
 
@@ -227,7 +226,7 @@ Goal: Confirm the respondent form communicates requirements and submission outco
 
  ID | Steps | Expected result | Actual result / evidence | Status |
 
----|---|---|---|---|
+| --- | --- | --- | --- | --- |
 
  10.1 | Follow the README setup steps from a clean checkout. | Setup instructions and commands match the repository and allow the app to run. | Not tested yet. | Not Tested |
 
