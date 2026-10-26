@@ -178,10 +178,16 @@ setValidationErrors({})
 )}
 
 {question.type === "short_text" && (
+   <div className="text-answer-container">
   <input
     type="text"
     placeholder="Type your answer..."
     maxLength={100}
+    className={
+        ((answers[question.id] as string) ?? "").length >= 100
+          ? "text-answer-limit"
+          : ""
+      }
     value={(answers[question.id] as string) ?? ""}
     onChange={(event) =>
       setAnswers({
@@ -190,24 +196,30 @@ setValidationErrors({})
       })
     }
   />
+  </div>
 )}
 
 {question.type === "long_text" && (
-  <textarea
-    placeholder="Write your answer..."
-    rows={4}
-    maxLength={500}
-    value={(answers[question.id] as string) ?? ""}
-    onChange={(event) =>
-      setAnswers({
-        ...answers,
-        [question.id]: event.target.value,
-      })
-    }
-  />
+  <div className="text-answer-container">
+    <textarea
+      placeholder="Write your answer..."
+      rows={4}
+      maxLength={500}
+      className={
+        ((answers[question.id] as string) ?? "").length >= 500
+          ? "text-answer-limit"
+          : ""
+      }
+      value={(answers[question.id] as string) ?? ""}
+      onChange={(event) =>
+        setAnswers({
+          ...answers,
+          [question.id]: event.target.value,
+        })
+      }
+    />
+  </div>
 )}
-
- 
 
 
 {question.options?.map((option) => (

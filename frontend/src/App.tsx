@@ -708,12 +708,15 @@ return (
 
     <label htmlFor="question-label">Question text</label>
     <input
-      id="question-label"
-      maxLength={200}
-      value={questionLabel}
-      onChange={(event) => setQuestionLabel(event.target.value)}
-      placeholder="Enter your question"
-    />
+  id="question-label"
+  maxLength={200}
+  className={
+    questionLabel.length >= 200 ? "text-answer-limit" : ""
+  }
+  value={questionLabel}
+  onChange={(event) => setQuestionLabel(event.target.value)}
+  placeholder="Enter your question"
+/>
 
     <label htmlFor="question-helper-text">
   Helper text (optional)
@@ -721,6 +724,9 @@ return (
 <textarea
   id="question-helper-text"
   maxLength={300}
+  className={
+    questionHelperText.length >= 300 ? "text-answer-limit" : ""
+  }
   value={questionHelperText}
   onChange={(event) => setQuestionHelperText(event.target.value)}
   placeholder="Add guidance to help respondents answer"
@@ -750,20 +756,23 @@ return (
     {questionOptions.map((option, index) => (
   <div key={option.id || index}>
     <input
-      maxLength={100}
-      value={option.text}
-      placeholder={`Option ${index + 1}`}
-      onChange={(event) => {
-        const updatedOptions = [...questionOptions]
+  maxLength={100}
+  className={
+    option.text.length >= 100 ? "text-answer-limit" : ""
+  }
+  value={option.text}
+  placeholder={`Option ${index + 1}`}
+  onChange={(event) => {
+    const updatedOptions = [...questionOptions]
 
-        updatedOptions[index] = {
-          ...updatedOptions[index],
-          text: event.target.value,
-        }
+    updatedOptions[index] = {
+      ...updatedOptions[index],
+      text: event.target.value,
+    }
 
-        setQuestionOptions(updatedOptions)
-      }}
-    />
+    setQuestionOptions(updatedOptions)
+  }}
+/>
 
     {questionOptions.length > 2 && (
       <button
@@ -843,13 +852,16 @@ return (
     </label>
 
     <input
-      id={`edit-question-${question.id}`}
-      maxLength={200}
-      value={editQuestionLabel}
-      onChange={(event) =>
-        setEditQuestionLabel(event.target.value)
-      }
-    />
+  id={`edit-question-${question.id}`}
+  maxLength={200}
+  className={
+    editQuestionLabel.length >= 200 ? "text-answer-limit" : ""
+  }
+  value={editQuestionLabel}
+  onChange={(event) =>
+    setEditQuestionLabel(event.target.value)
+  }
+/>
     <label htmlFor={`edit-helper-text-${question.id}`}>
   Helper text (optional)
 </label>
@@ -857,6 +869,11 @@ return (
 <textarea
   id={`edit-helper-text-${question.id}`}
   maxLength={300}
+  className={
+    editQuestionHelperText.length >= 300
+      ? "text-answer-limit"
+      : ""
+  }
   rows={2}
   value={editQuestionHelperText}
   onChange={(event) =>
@@ -872,21 +889,24 @@ return (
 
     {editQuestionOptions.map((option, index) => (
       <div key={index}>
-        <input
-          maxLength={100}
-          value={option.text}
-          placeholder={`Option ${index + 1}`}
-          onChange={(event) => {
-            const updatedOptions = [...editQuestionOptions]
-            updatedOptions[index] = {
+       <input
+  maxLength={100}
+  className={
+    option.text.length >= 100 ? "text-answer-limit" : ""
+  }
+  value={option.text}
+  placeholder={`Option ${index + 1}`}
+  onChange={(event) => {
+    const updatedOptions = [...editQuestionOptions]
+
+    updatedOptions[index] = {
       ...updatedOptions[index],
       text: event.target.value,
     }
 
-            setEditQuestionOptions(updatedOptions)
-          }}
-        />
-
+    setEditQuestionOptions(updatedOptions)
+  }}
+/>
         <button
           type="button"
           className="secondary-button"
@@ -1050,6 +1070,9 @@ return (
 <input
   id="survey-title"
   maxLength={100}
+  className={
+    surveyTitle.length >= 100 ? "text-answer-limit" : ""
+  }
   value={surveyTitle}
   onChange={(event) => setSurveyTitle(event.target.value)}
   placeholder="e.g. New Employee Onboarding"
@@ -1061,6 +1084,9 @@ return (
 <textarea
   id="survey-description"
   maxLength={500}
+  className={
+    surveyDescription.length >= 500 ? "text-answer-limit" : ""
+  }
   value={surveyDescription}
   onChange={(event) => setSurveyDescription(event.target.value)}
   placeholder="Survey description (optional)"
