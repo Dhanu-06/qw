@@ -146,7 +146,7 @@ const {
   async function loadSurveys() {
     try {
       setSurveyError("")
-      setLoadingSurveys(true)
+      //setLoadingSurveys(true)
       await refreshSurveys()
     } catch (error) {
       setSurveyError(
