@@ -26,7 +26,7 @@ Fail — the observed behavior does not match the expected result.
 
 
 
-Date tested: 2026-10-19
+Date tested: 2026-10-26
 
 
 
@@ -276,7 +276,6 @@ Screenshots are stored in the repository's evidence/ folder. The relative links 
 
 
 
-Before submitting, confirm that the files exist in evidence/ with these exact names and that each screenshot visibly supports the checks linked to it. A screenshot of the UI alone does not prove every API edge case in a range; retain separate evidence for additional cases if needed.
 
 
 
